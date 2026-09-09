@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="ru-RU">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1">
+    <title>Оформление заказа</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Geologica:wght,CRSV@100..900,0&amp;family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&amp;display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./libs/css/normalize.css">
+    <link rel="stylesheet" href="./libs/css/fancybox.css">
+    <link rel="stylesheet" href="./libs/css/nouislider.css">
+    <link rel="stylesheet" href="./libs/css/swiper-bundle.min.css">
+    <link rel="stylesheet" href="./libs/css/slimselect.css">
+    <link rel="stylesheet" href="./css/all.css">
+  </head>
+  <body>
+    <div class="page-flex">
+      <div class="bg-overlay"></div>
+      <header class="header">
+        <div class="container">
+          <div class="header__inner">
+            <div class="header-logo"><a href="index.html"><img class="header-logo_desktop" src="./img/logo.svg" alt=""><img class="header-logo_mobile" src="./img/logo-mobile.svg" alt=""></a></div>
+            <div class="header-search">
+              <div class="header-search-form">
+                <form action=""></form>
+                <button class="btn header-search__catalog-button"><svg width="24" height="24"><use xlink:href="./img/sprite.svg#menu-icon"></use></svg><span>Каталог</span></button>
+                <input class="header-search__input" type="text" placeholder="Поиск по сайту">
+                <button class="header-search__clear"><svg width="32" height="32"><use xlink:href="./img/sprite.svg#close-icon"></use></svg></button>
+                <button class="header-search__button" type="submit"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_3001_30449)"><path d="M10.5 18C14.6421 18 18 14.6421 18 10.5C18 6.35786 14.6421 3 10.5 3C6.35786 3 3 6.35786 3 10.5C3 14.6421 6.35786 18 10.5 18Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /><path d="M15.8047 15.8027L21.0012 20.9993" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></g><defs>    <clipPath id="clip0_3001_30449"><rect width="24" height="24" fill="white" /></clipPath></defs></svg></button>
+              </div>
+              <div class="header-search-results">
+                <div class="header-search-result"><a class="header-search-result__photo" href=""><img src="./img/product01.png" alt=""></a><a class="header-search-result__name" href="">Яблоки Антоновка, сервировка по 1 кг.</a>
+                  <div class="header-search-result__buy">
+                    <div class="header-search-result__buy-sale">Выгода 20 ₽</div>
+                    <div class="header-search-result__buy-block">
+                      <div class="header-search-result__buy-count">1 шт.</div>
+                      <div class="header-search-result__buy-prices">
+                        <div class="header-search-result__buy-price">180 ₽</div>
+                        <div class="header-search-result__buy-old-price">200 ₽</div>
+                      </div>
+                    </div>
+                    <button class="btn"><svg width="24" height="24"><use xlink:href="./img/sprite.svg#catalog-cart-button"></use></svg><span>В корзину</span></button>
+                  </div>
+                </div>
+                <div class="header-search-result"><a class="header-search-result__photo" href=""><img src="./img/product01.png" alt=""></a><a class="header-search-result__name" href="">Яблоки Антоновка, сервировка по 1 кг.</a>
+                  <div class="header-search-result__buy">
+                    <div class="header-search-result__buy-sale">Выгода 20 ₽</div>
+                    <div class="header-search-result__buy-block">
+                      <div class="header-search-result__buy-count">1 шт.</div>
+                      <div class="header-search-result__buy-prices">
+                        <div class="header-search-result__buy-price">180 ₽</div>
+                        <div class="header-search-result__buy-old-price">200 ₽</div>
+                      </div>
+                    </div>
+                    <button class="btn"><svg width="24" height="24"><use xlink:href="./img/sprite.svg#catalog-cart-button"></use></svg><span>В корзину</span></button>
+                  </div>
+                </div>
+                <div class="header-search-result"><a class="header-search-result__photo" href=""><img src="./img/product01.png" alt=""></a><a class="header-search-result__name" href="">Яблоки Антоновка, сервировка по 1 кг.</a>
+                  <div class="header-search-result__buy">
+                    <div class="header-search-result__buy-sale">Выгода 20 ₽</div>
+                    <div class="header-search-result__buy-block">
+                      <div class="header-search-result__buy-count">1 шт.</div>
+                      <div class="header-search-result__buy-prices">
+                        <div class="header-search-result__buy-price">180 ₽</div>
+                        <div class="header-search-result__buy-old-price">200 ₽</div>
+                      </div>
+                    </div>
+                    <button class="btn"><svg width="24" height="24"><use xlink:href="./img/sprite.svg#catalog-cart-button"></use></svg><span>В корзину</span></button>
+                  </div>
+                </div>
+                <button class="btn btn_show-search">Показать все 25 товаров</button>
+              </div>
+            </div>
+            <div class="header-catalog-menu">
+              <div class="header-catalog-menu__inner">
+                <div class="header-catalog-menu__left"><a class="header-catalog-menu__category" href="" data-category="1">
+                    ВкусДом<svg width="24" height="24"><use xlink:href="./img/sprite.svg#arrow-menu-icon"></use></svg></a><a class="header-catalog-menu__category" href="" data-category="2">
+                    Готовая еда<svg width="24" height="24"><use xlink:href="./img/sprite.svg#arrow-menu-icon"></use></svg></a><a class="header-catalog-menu__category" href="" data-category="3">
+                    Летний сезон<svg width="24" height="24"><use xlink:href="./img/sprite.svg#arrow-menu-icon"></use></svg></a><a class="header-catalog-menu__category" href="" data-category="4">
+                    Овощи<svg width="24" height="24"><use xlink:href="./img/sprite.svg#arrow-menu-icon"></use></svg></a><a class="header-catalog-menu__category" href="" data-category="5">
+                    Молочные продукты<svg width="24" height="24"><use xlink:href="./img/sprite.svg#arrow-menu-icon"></use></svg></a></div>
+                <div class="header-catalog-menu__right">
+                  <div class="header-catalog-menu__subcategory" data-subcategory="1"><a class="header-catalog-menu__subcategory-name" href="">ВкусДом</a>
+                    <div class="header-catalog-menu__subcategory-items"><a class="header-catalog-menu__subcategory-link" href="">Комбо</a><a class="header-catalog-menu__subcategory-link" href="">Закуски</a><a class="header-catalog-menu__subcategory-link" href="">Комбо</a><a class="header-catalog-menu__subcategory-link" href="">Закуски</a><a class="header-catalog-menu__subcategory-link" href="">Комбо</a><a class="header-catalog-menu__subcategory-link" href="">Закуски</a><a class="header-catalog-menu__subcategory-link" href="">Комбо</a><a class="header-catalog-menu__subcategory-link" href="">Закуски</a><a class="header-catalog-menu__subcategory-link" href="">Комбо</a><a class="header-catalog-menu__subcategory-link" href="">Закуски</a><a class="header-catalog-menu__subcategory-link" href="">Комбо</a><a class="header-catalog-menu__subcategory-link" href="">Закуски</a><a class="header-catalog-menu__subcategory-link" href="">Комбо</a><a class="header-catalog-menu__subcategory-link" href="">Закуски</a><a class="header-catalog-menu__subcategory-link" href="">Комбо</a><a class="header-catalog-menu__subcategory-link" href="">Закуски</a></div>
+                  </div>
+                  <div class="header-catalog-menu__subcategory" data-subcategory="2"><a class="header-catalog-menu__subcategory-name" href="">Готовая еда</a>
+                    <div class="header-catalog-menu__subcategory-items"><a class="header-catalog-menu__subcategory-link" href="">Комбо</a><a class="header-catalog-menu__subcategory-link" href="">Закуски</a><a class="header-catalog-menu__subcategory-link" href="">Комбо</a><a class="header-catalog-menu__subcategory-link" href="">Закуски</a><a class="header-catalog-menu__subcategory-link" href="">Комбо</a><a class="header-catalog-menu__subcategory-link" href="">Закуски</a><a class="header-catalog-menu__subcategory-link" href="">Комбо</a><a class="header-catalog-menu__subcategory-link" href="">Закуски</a><a class="header-catalog-menu__subcategory-link" href="">Комбо</a><a class="header-catalog-menu__subcategory-link" href="">Закуски</a><a class="header-catalog-menu__subcategory-link" href="">Комбо</a><a class="header-catalog-menu__subcategory-link" href="">Закуски</a><a class="header-catalog-menu__subcategory-link" href="">Комбо</a><a class="header-catalog-menu__subcategory-link" href="">Закуски</a><a class="header-catalog-menu__subcategory-link" href="">Комбо</a><a class="header-catalog-menu__subcategory-link" href="">Закуски</a></div>
+                  </div>
+                  <div class="header-catalog-menu__subcategory" data-subcategory="3"><a class="header-catalog-menu__subcategory-name" href="">Летний сезон</a>
+                    <div class="header-catalog-menu__subcategory-items"><a class="header-catalog-menu__subcategory-link" href="">Комбо</a><a class="header-catalog-menu__subcategory-link" href="">Закуски</a><a class="header-catalog-menu__subcategory-link" href="">Комбо</a><a class="header-catalog-menu__subcategory-link" href="">Закуски</a><a class="header-catalog-menu__subcategory-link" href="">Комбо</a><a class="header-catalog-menu__subcategory-link" href="">Закуски</a><a class="header-catalog-menu__subcategory-link" href="">Комбо</a><a class="header-catalog-menu__subcategory-link" href="">Закуски</a><a class="header-catalog-menu__subcategory-link" href="">Комбо</a><a class="header-catalog-menu__subcategory-link" href="">Закуски</a><a class="header-catalog-menu__subcategory-link" href="">Комбо</a><a class="header-catalog-menu__subcategory-link" href="">Закуски</a><a class="header-catalog-menu__subcategory-link" href="">Комбо</a><a class="header-catalog-menu__subcategory-link" href="">Закуски</a><a class="header-catalog-menu__subcategory-link" href="">Комбо</a><a class="header-catalog-menu__subcategory-link" href="">Закуски</a></div>
+                  </div>
+                  <div class="header-catalog-menu__subcategory" data-subcategory="4"><a class="header-catalog-menu__subcategory-name" href="">Овощи</a>
+                    <div class="header-catalog-menu__subcategory-items"><a class="header-catalog-menu__subcategory-link" href="">Комбо</a><a class="header-catalog-menu__subcategory-link" href="">Закуски</a><a class="header-catalog-menu__subcategory-link" href="">Комбо</a></div>
+                  </div>
+                  <div class="header-catalog-menu__subcategory" data-subcategory="5"><a class="header-catalog-menu__subcategory-name" href="">Молочные продукты</a>
+                    <div class="header-catalog-menu__subcategory-items"><a class="header-catalog-menu__subcategory-link" href="">Комбо</a><a class="header-catalog-menu__subcategory-link" href="">Закуски</a><a class="header-catalog-menu__subcategory-link" href="">Комбо</a></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <button class="btn header-green-button"><svg width="24" height="24"><use xlink:href="./img/sprite.svg#mappin-icon"></use></svg><span>Укажите способ получения</span></button>
+            <div class="header-links"><a class="header-links__link" href=""><svg width="24" height="24"><use xlink:href="./img/sprite.svg#favorite-icon"></use></svg><span class="header-links__link-count">1</span></a><a class="header-links__link" href=""><svg width="24" height="24"><use xlink:href="./img/sprite.svg#cart-icon"></use></svg><span class="header-links__link-count">0</span></a><a class="header-links__link" href=""><svg width="24" height="24"><use xlink:href="./img/sprite.svg#user-icon"></use></svg></a></div>
+            <div class="hamburger">
+              <div class="hamburger__button"><span></span><span></span><span></span></div>
+            </div>
+          </div>
+          <div class="header-menu">
+            <div class="header-menu__inner">
+              <div class="swiper header-menu-slider">
+                <div class="swiper-wrapper">
+                  <div class="swiper-slide"><a href="">Акции</a></div>
+                  <div class="swiper-slide"><a href="">Хиты продаж</a></div>
+                  <div class="swiper-slide"><a href="">Новинки</a></div>
+                  <div class="swiper-slide"><a href="">Сделано в Чеченской Республике</a></div>
+                  <div class="swiper-slide"><a href="">Готовая еда</a></div>
+                  <div class="swiper-slide"><a href="">Собственное производство</a></div>
+                  <div class="swiper-slide"><a href="">Овощи и фрукты</a></div>
+                  <div class="swiper-slide"><a href="">Мясо</a></div>
+                  <div class="swiper-slide"><a href="">Рыба</a></div>
+                  <div class="swiper-slide"><a href="">Сыры</a></div>
+                  <div class="swiper-slide"><a href="">Хлеб</a></div>
+                  <div class="swiper-slide"><a href="">Акции</a></div>
+                  <div class="swiper-slide"><a href="">Хиты продаж</a></div>
+                  <div class="swiper-slide"><a href="">Новинки</a></div>
+                  <div class="swiper-slide"><a href="">Сделано в Чеченской Республике</a></div>
+                  <div class="swiper-slide"><a href="">Готовая еда</a></div>
+                  <div class="swiper-slide"><a href="">Собственное производство</a></div>
+                  <div class="swiper-slide"><a href="">Овощи и фрукты</a></div>
+                  <div class="swiper-slide"><a href="">Мясо</a></div>
+                  <div class="swiper-slide"><a href="">Рыба</a></div>
+                  <div class="swiper-slide"><a href="">Сыры</a></div>
+                  <div class="swiper-slide"><a href="">Хлеб</a></div>
+                </div>
+              </div>
+              <div class="header-menu-slider-next"><svg width="6" height="10"><use xlink:href="./img/sprite.svg#arrow-right-icon"></use></svg></div>
+              <div class="header-menu-slider-prev"><svg width="6" height="10"><use xlink:href="./img/sprite.svg#arrow-left-icon"></use></svg></div>
+            </div>
+            <div class="header-menu__dropdown"><span>
+                Еще<svg width="24" height="24"><use xlink:href="./img/sprite.svg#arrow-down-icon"></use></svg></span>
+              <ul>
+                <li><a href="">Акции</a></li>
+                <li><a href="">Хиты продаж</a></li>
+                <li><a href="">Новинки</a></li>
+                <li><a href="">По размеру скидки</a></li>
+                <li><a href="">Готовая еда</a></li>
+              </ul>
+            </div>
+          </div>
+          <div class="header__two-buttons">
+            <button class="btn">
+              <svg width="24" height="24"><use xlink:href="./img/sprite.svg#delivery-icon"></use></svg>Доставка</button>
+            <button class="btn">
+              <svg width="24" height="24"><use xlink:href="./img/sprite.svg#self-pickup-icon"></use></svg>Самовывоз</button>
+          </div>
+        </div>
+      </header>
+      <div class="popup-menu">
+        <div class="popup-menu__bonuses">
+          <div class="popup-menu__bonuses-title">Доступно бонусов</div>
+          <div class="popup-menu__bonuses-count">
+            <svg width="32" height="32"><use xlink:href="./img/sprite.svg#bonuses-icon"></use></svg>500</div>
+        </div><a class="btn" href="">
+          <svg width="24" height="24"><use xlink:href="./img/sprite.svg#menu-icon"></use></svg>Каталог</a>
+        <div class="popup-menu__nav">
+          <ul>
+            <li><a href="">
+                <svg width="24" height="24"><use xlink:href="./img/sprite.svg#nav-icon01"></use></svg>Акции</a></li>
+            <li><a href="">
+                <svg width="24" height="24"><use xlink:href="./img/sprite.svg#nav-icon02"></use></svg>Хиты продаж</a></li>
+            <li><a href="">
+                <svg width="24" height="24"><use xlink:href="./img/sprite.svg#nav-icon03"></use></svg>Новинки</a></li>
+          </ul>
+        </div>
+        <div class="popup-menu__nav">
+          <ul>
+            <li><a href="">Бонусы и акции</a></li>
+            <li><a href="">Избранное</a></li>
+            <li><a href="">Доставка и самовывоз</a></li>
+            <li><a href="">Магазины</a></li>
+          </ul>
+        </div>
+        <div class="popup-menu__personal">
+          <div class="popup-menu__personal-title">Войти в личный кабинет</div>
+          <div class="popup-menu__personal-text">Для отслеживания своих заказов, бонусных баллов и скидок</div>
+          <button class="btn">Войти</button>
+        </div>
+        <div class="popup-menu__nav">
+          <ul>
+            <li><a href="">
+                <svg width="24" height="24"><use xlink:href="./img/sprite.svg#nav-icon04"></use></svg>Мой профиль</a></li>
+            <li><a href="">
+                <svg width="24" height="24"><use xlink:href="./img/sprite.svg#nav-icon05"></use></svg>Заказы</a></li>
+            <li><a href="">
+                <svg width="24" height="24"><use xlink:href="./img/sprite.svg#nav-icon06"></use></svg>Мои бонусы</a></li>
+          </ul>
+        </div>
+      </div>
+      <main class="main">
+        <div class="container">
+          <div class="breadcrumbs">
+            <ul>
+              <li><a href="">Главная</a></li>
+              <li>
+                <div class="breadcrumbs__arrow"><svg width="16" height="16"><use xlink:href="./img/sprite.svg#caret-icon"></use></svg></div>
+              </li>
+              <li><span>оформление  заказа</span></li>
+            </ul>
+          </div>
+          <div class="order-page">
+            <div class="section-title">
+              <svg width="24" height="24"><use xlink:href="./img/sprite.svg#arrow-big-left-icon"></use></svg>Оформление заказа</div>
+            <div class="order-page__inner">
+              <div class="order-page__left">
+                <div class="order-steps">
+                  <div class="order-steps__step">
+                    <div class="order-steps__top">
+                      <div class="order-steps__name">
+                        <svg width="24" height="24"><use xlink:href="./img/sprite.svg#user-green-icon"></use></svg>Данные покупателя</div>
+                    </div>
+                    <div class="tabs">
+                      <ul class="tabs__list">
+                        <li>Физическое лицо</li>
+                        <li>Юридическое лицо</li>
+                      </ul>
+                      <div class="tabs__content">
+                        <div>
+                          <div class="order-steps__fields">
+                            <div class="form__block">
+                              <div class="form__label">ФИО</div>
+                              <div class="form__input">
+                                <input type="text" value="" placeholder="Иванов Иван Иванович"><span class="form__input-text"> </span>
+                              </div>
+                            </div>
+                            <div class="form__block">
+                              <div class="form__label">Номер квартиры</div>
+                              <div class="form__input">
+                                <input type="text" value="" placeholder="Номер квартиры"><span class="form__input-text"> </span>
+                              </div>
+                            </div>
+                            <div class="form__block">
+                              <div class="form__label">Телефон</div>
+                              <div class="form__input">
+                                <input type="tel" value="" placeholder="+7 (9|"><span class="form__input-text"> </span>
+                              </div>
+                            </div>
+                            <div class="form__block">
+                              <div class="form__label">Этаж</div>
+                              <div class="form__input">
+                                <input type="text" value="" placeholder="Этаж"><span class="form__input-text"> </span>
+                              </div>
+                            </div>
+                            <div class="form__block form__block_error">
+                              <div class="form__label">Электронная почта</div>
+                              <div class="form__input">
+                                <input type="email" value="" placeholder="examplemail.ru"><span class="form__input-text">Неверный адрес электронной почты</span>
+                              </div>
+                            </div>
+                            <div class="form__block">
+                              <div class="form__label">Код домофона</div>
+                              <div class="form__input">
+                                <input type="text" value="" placeholder="Код домофона"><span class="form__input-text"> </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div>
+                          <div class="order-steps__fields">
+                            <div class="form__block">
+                              <div class="form__label">ФИО</div>
+                              <div class="form__input">
+                                <input type="text" value="" placeholder="Иванов Иван Иванович"><span class="form__input-text"> </span>
+                              </div>
+                            </div>
+                            <div class="form__block">
+                              <div class="form__label">Юридический адрес</div>
+                              <div class="form__input">
+                                <input type="text" value="" placeholder="Юридический адрес"><span class="form__input-text"> </span>
+                              </div>
+                            </div>
+                            <div class="form__block">
+                              <div class="form__label">Название компании</div>
+                              <div class="form__input">
+                                <input type="text" value="" placeholder="Название компании"><span class="form__input-text"> </span>
+                              </div>
+                            </div>
+                            <div class="form__block">
+                              <div class="form__label">КПП</div>
+                              <div class="form__input">
+                                <input type="text" value="" placeholder="КПП"><span class="form__input-text"> </span>
+                              </div>
+                            </div>
+                            <div class="form__block">
+                              <div class="form__label">Номер счета (р/с)</div>
+                              <div class="form__input">
+                                <input type="text" value="" placeholder="Номер счета (р/с)"><span class="form__input-text"> </span>
+                              </div>
+                            </div>
+                            <div class="form__block">
+                              <div class="form__label">Наименование банка</div>
+                              <div class="form__input">
+                                <input type="text" value="" placeholder="Наименование банка"><span class="form__input-text"> </span>
+                              </div>
+                            </div>
+                            <div class="form__block">
+                              <div class="form__label">БИК</div>
+                              <div class="form__input">
+                                <input type="text" value="" placeholder="БИК"><span class="form__input-text"> </span>
+                              </div>
+                            </div>
+                            <div class="form__block">
+                              <div class="form__label">Корреспондентский счет (к/с)</div>
+                              <div class="form__input">
+                                <input type="text" value="" placeholder="Корреспондентский счет (к/с)"><span class="form__input-text"> </span>
+                              </div>
+                            </div>
+                            <div class="form__block">
+                              <div class="form__label">Контактное лицо</div>
+                              <div class="form__input">
+                                <input type="text" value="" placeholder="Контактное лицо"><span class="form__input-text"> </span>
+                              </div>
+                            </div>
+                            <div class="form__block form__block_error">
+                              <div class="form__label">Электронная почта</div>
+                              <div class="form__input">
+                                <input type="email" value="" placeholder="examplemail.ru"><span class="form__input-text">Неверный адрес электронной почты</span>
+                              </div>
+                            </div>
+                            <div class="form__block">
+                              <div class="form__label">Телефон</div>
+                              <div class="form__input">
+                                <input type="tel" value="" placeholder="+7 (9|">
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="order-steps__step">
+                    <div class="order-steps__top">
+                      <div class="order-steps__name">
+                        <svg width="24" height="24"><use xlink:href="./img/sprite.svg#store-icon"></use></svg>Доставка(для физ лиц)</div>
+                    </div>
+                    <div class="order-steps__place">
+                      <div class="order-steps__place-name">Адрес доставки</div>
+                      <div class="order-steps__place-address">г. Грозный, проспект Кунта-Хаджи Кишиева, 112</div><a class="order-steps__place-link" href="">Изменить способ доставки</a>
+                    </div>
+                    <div class="order-steps__time">
+                      <div class="order-steps__time-title">Время доставки</div>
+                      <div class="order-steps__time-options">
+                        <div class="order-steps__time-option">10:00 - 12:00</div>
+                        <div class="order-steps__time-option order-steps__time-option_active"> 12:00 - 14:00</div>
+                        <div class="order-steps__time-option">14:00 - 16:00</div>
+                        <div class="order-steps__time-option">16:00 - 18:00</div>
+                        <div class="order-steps__time-option">18:00 - 20:00</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="order-steps__step">
+                    <div class="order-steps__top">
+                      <div class="order-steps__name">
+                        <svg width="24" height="24"><use xlink:href="./img/sprite.svg#store-icon"></use></svg>Самовывоз(для физ лиц)</div>
+                    </div>
+                    <div class="order-steps__place">
+                      <div class="order-steps__place-name">Адрес cамовывоза</div>
+                      <div class="order-steps__place-address">г. Грозный, проспект Кунта-Хаджи Кишиева, 112</div><a class="order-steps__place-link" href="">Изменить способ cамовывоза</a>
+                    </div>
+                    <div class="order-steps__time">
+                      <div class="order-steps__time-title">Выберите интервал самовывоза</div>
+                      <div class="order-steps__time-options">
+                        <div class="order-steps__time-option">10:00 - 12:00</div>
+                        <div class="order-steps__time-option order-steps__time-option_active"> 12:00 - 14:00</div>
+                        <div class="order-steps__time-option">14:00 - 16:00</div>
+                        <div class="order-steps__time-option">16:00 - 18:00</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="order-steps__step">
+                    <div class="order-steps__top">
+                      <div class="order-steps__name">
+                        <svg width="24" height="24"><use xlink:href="./img/sprite.svg#store-icon"></use></svg>Доставка(для юр лиц)</div>
+                    </div>
+                    <div class="order-steps__place">
+                      <div class="order-steps__place-name">Адрес доставки</div>
+                      <div class="order-steps__place-address">г. Грозный, проспект Кунта-Хаджи Кишиева, 112</div><a class="order-steps__place-link" href="">Изменить способ доставки</a>
+                    </div>
+                    <div class="order-steps__place">
+                      <div class="order-steps__place-name">Условия доставки</div>
+                      <div class="order-steps__place-text">
+                        <ul>
+                          <li>До 200 кг включительно — применяется базовый тариф доставки.</li>
+                          <li>Свыше 200 кг — применяется базовый тариф + 15 ₽ за каждый килограмм сверх 200 кг.</li>
+                        </ul>
+                      </div>
+                      <div class="order-steps__place-ps">Расчёт стоимости доставки производится автоматически исходя из общего веса товаров в корзине.</div>
+                    </div>
+                    <div class="order-steps__time">
+                      <div class="order-steps__time-title">Время доставки</div>
+                      <div class="order-steps__time-options">
+                        <div class="order-steps__time-option">10:00 - 12:00</div>
+                        <div class="order-steps__time-option order-steps__time-option_active"> 12:00 - 14:00</div>
+                        <div class="order-steps__time-option">14:00 - 16:00</div>
+                        <div class="order-steps__time-option">16:00 - 18:00</div>
+                        <div class="order-steps__time-option">18:00 - 20:00</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="order-steps__step">
+                    <div class="order-steps__top">
+                      <div class="order-steps__name">
+                        <svg width="24" height="24"><use xlink:href="./img/sprite.svg#store-icon"></use></svg>Самовывоз(для юр лиц)</div>
+                    </div>
+                    <div class="order-steps__place">
+                      <div class="order-steps__place-name">Адрес cамовывоза</div>
+                      <div class="order-steps__place-address">г. Грозный, проспект Кунта-Хаджи Кишиева, 112</div><a class="order-steps__place-link" href="">Изменить способ cамовывоза</a>
+                    </div>
+                    <div class="order-steps__time">
+                      <div class="order-steps__time-title">Выберите интервал самовывоза</div>
+                      <div class="order-steps__time-options">
+                        <div class="order-steps__time-option">10:00 - 12:00</div>
+                        <div class="order-steps__time-option order-steps__time-option_active"> 12:00 - 14:00</div>
+                        <div class="order-steps__time-option">14:00 - 16:00</div>
+                        <div class="order-steps__time-option">16:00 - 18:00</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="order-steps__step">
+                    <div class="order-steps__top">
+                      <div class="order-steps__name">
+                        <svg width="24" height="24"><use xlink:href="./img/sprite.svg#wallet-icon"></use></svg>Способ оплаты (физ лицо)</div>
+                    </div>
+                    <div class="order-steps__pays">
+                      <div class="pay-variants">
+                        <div class="pay-variants__variant">
+                          <div class="pay-variants__variant-icon"><svg width="24" height="24"><use xlink:href="./img/sprite.svg#card-icon"></use></svg></div>
+                          <div class="pay-variants__variant-name">Оплата картой</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="order-steps__step">
+                    <div class="order-steps__top">
+                      <div class="order-steps__name">
+                        <svg width="24" height="24"><use xlink:href="./img/sprite.svg#wallet-icon"></use></svg>Способ оплаты (юр лицо)</div>
+                    </div>
+                    <div class="order-steps__pays">
+                      <div class="pay-variants">
+                        <div class="pay-variants__variant">
+                          <div class="pay-variants__variant-icon"><svg width="24" height="24"><use xlink:href="./img/sprite.svg#card-icon"></use></svg></div>
+                          <div class="pay-variants__variant-name">Оплата по счету</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="order-steps__step">
+                    <div class="order-steps__top">
+                      <div class="order-steps__name">Если товара нет в наличии</div>
+                    </div>
+                    <div class="order-steps__options">
+                      <label class="custom-checkbox">
+                        <input class="custom-checkbox__checkbox" type="checkbox" name=""/><span class="custom-checkbox__span"></span><span class="custom-checkbox__label">Позвонить для согласования замен</span>
+                      </label>
+                      <label class="custom-checkbox">
+                        <input class="custom-checkbox__checkbox" type="checkbox" name=""/><span class="custom-checkbox__span"></span><span class="custom-checkbox__label">Не спрашивать, подобрать замену</span>
+                      </label>
+                      <label class="custom-checkbox">
+                        <input class="custom-checkbox__checkbox" type="checkbox" name=""/><span class="custom-checkbox__span"></span><span class="custom-checkbox__label">Не спрашивать убрать из заказа</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="order-page__right">
+                <div class="order-page__info">
+                  <div class="order-page__info-title">Оплата:</div>
+                  <div class="order-page__info-params">
+                    <div class="order-page__info-param">
+                      <div class="order-page__info-param-name">4 товара</div>
+                      <div class="order-page__info-param-dots"></div>
+                      <div class="order-page__info-param-value">2 000 ₽</div>
+                    </div>
+                    <div class="order-page__info-param">
+                      <div class="order-page__info-param-name">Скидка 10%</div>
+                      <div class="order-page__info-param-dots"></div>
+                      <div class="order-page__info-param-value">— 200 ₽</div>
+                    </div>
+                    <div class="order-page__info-param">
+                      <div class="order-page__info-param-name">Общий вес</div>
+                      <div class="order-page__info-param-dots"></div>
+                      <div class="order-page__info-param-value">25 кг.</div>
+                    </div>
+                    <div class="order-page__info-param">
+                      <div class="order-page__info-param-name">Стоимость доставки</div>
+                      <div class="order-page__info-param-dots"></div>
+                      <div class="order-page__info-param-value">55 ₽</div>
+                    </div>
+                  </div>
+                  <div class="order-page__info-bonuses">
+                    <div class="order-page__info-bonuses-title">Мои бонусы:</div>
+                    <div class="order-page__info-bonuses-text">Количество бонусов, которые можно списать</div>
+                    <form action="">
+                      <input class="order-page__info-bonuses-input" type="text" placeholder="180">
+                    </form>
+                    <div class="order-page__info-param">
+                      <div class="order-page__info-param-name">Будет начислено</div>
+                      <div class="order-page__info-param-dots"></div>
+                      <div class="order-page__info-param-value">+38</div>
+                    </div>
+                    <label class="custom-checkbox">
+                      <input class="custom-checkbox__checkbox" type="checkbox" name=""/><span class="custom-checkbox__span"></span><span class="custom-checkbox__label">Списать 180 бонусов</span>
+                    </label>
+                  </div>
+                  <div class="order-page__info-promo">
+                    <div class="order-page__info-promo-title">Ввести промокод</div>
+                    <form action="">
+                      <input class="order-page__info-promo-input" type="text" placeholder="Ввести промокод">
+                    </form><a class="order-page__info-promo-link" href="">Информация о промокоде <svg width="16" height="16"><use xlink:href="./img/sprite.svg#arrow-menu-icon"></use></svg></a>
+                  </div>
+                  <div class="order-page__info-total"><span>К оплате</span><span class="cart-page__info-summ">1800 ₽</span></div><a class="btn btn_big" href="">Оплатить</a>
+                  <div class="order-page__info-ps">Нажимая на кнопку Оплатить, вы принимаете условия Публичной оферты</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+      <footer class="footer">
+        <div class="container">
+          <div class="footer__top">
+            <div class="footer__inner">
+              <div class="footer__inner-left">
+                <div class="footer-logo"><img src="./img/logo.svg" alt=""></div>
+                <div class="footer-menu">
+                  <ul>
+                    <li><a href="">Каталог</a></li>
+                    <li><a href="">Акции</a></li>
+                    <li><a href="">Мои бонусы</a></li>
+                    <li><a href="">Оплата и доставка</a></li>
+                    <li><a href="">Укажите способ получения</a></li>
+                  </ul>
+                  <ul>
+                    <li><a href="">Политика обработки ПДн</a></li>
+                    <li><a href="">Горячая линия</a></li>
+                    <li><a href="">Правовая информация</a></li>
+                    <li><a href="">Вакансии</a></li>
+                    <li><a href="">О компании</a></li>
+                  </ul>
+                </div>
+                <div class="footer-links"><a class="footer-links__link" href=""><svg width="40" height="40"><use xlink:href="./img/sprite.svg#apple-icon"></use></svg><span>Загрузите в App Store</span></a><a class="footer-links__link" href=""><svg width="36" height="36"><use xlink:href="./img/sprite.svg#google-icon"></use></svg><span>Доступно в Google Play</span></a><a class="footer-links__link" href=""><svg width="40" height="40"><use xlink:href="./img/sprite.svg#rustore-icon"></use></svg><span>Загрузите в RuStore</span></a></div>
+              </div>
+              <div class="footer__inner-right">
+                <div class="footer-subscribe">
+                  <button class="footer-subscribe__button">Будьте в курсе выгодных предложений</button>
+                  <div class="footer-subscribe__text">Подпишитесь на рассылку и первыми узнавайте об акциях, скидках и новинках.</div>
+                </div>
+                <div class="footer-contacts">
+                  <div class="footer-contact">
+                    <div class="footer-contact__name">Телефон:</div>
+                    <div class="footer-contact__value"><a href="tel:+7 8712 22-44-88">+7 8712 22-44-88</a></div>
+                  </div>
+                  <div class="footer-contact">
+                    <div class="footer-contact__name">E-mail:</div>
+                    <div class="footer-contact__value"><a href="mailto:info@vkusdom.ru">info@vkusdom.ru</a></div>
+                  </div>
+                  <div class="footer-contact">
+                    <div class="footer-contact__name">Адрес:</div>
+                    <div class="footer-contact__value">364024, Чеченская Республика, г. Грозный, проспект А.А. Кадырова, 115</div>
+                  </div>
+                  <div class="footer-contact">
+                    <div class="footer-contact__name">График работы:</div>
+                    <div class="footer-contact__value">Ежедневно с 08:00 до 23:00</div>
+                  </div>
+                </div>
+                <div class="socials"><a class="socials__link" href=""><svg width="27" height="17"><use xlink:href="./img/sprite.svg#vk-icon"></use></svg></a><a class="socials__link" href=""><svg width="27" height="27"><use xlink:href="./img/sprite.svg#max-icon"></use></svg></a></div>
+              </div>
+            </div>
+          </div>
+          <div class="footer__bottom">
+            <div class="footer-copyright">©2026. Официальный сайт сети «Вкусдом» — доставка продуктов на дом</div>
+            <div class="footer-conf"><a href="">Политика конфиденциальности</a></div>
+          </div>
+        </div>
+      </footer>
+      <div class="section-cookies">
+        <button class="section-cookies__close"><svg width="32" height="32"><use xlink:href="./img/sprite.svg#close-icon"></use></svg></button>
+        <div class="section-cookies__columns">
+          <div class="section-cookies__column">
+            <div class="section-cookies__title">Мы используем cookie 🍪</div>
+            <div class="section-cookies__text">«ВкусДом» использует файлы cookie, чтобы сайт работал корректно, запоминал ваши настройки и помогал нам делать покупки удобнее.</div>
+          </div>
+          <div class="section-cookies__column">
+            <div class="section-cookies__notice">Вы можете принять все cookies или настроить их использование.</div>
+            <div class="section-cookies__buttons">
+              <button class="btn btn_accept-coookies">Принять все</button>
+              <button class="btn btn_settings-coookies">Настроить</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="section-cookies-settings">
+        <button class="section-cookies__close"><svg width="32" height="32"><use xlink:href="./img/sprite.svg#close-icon"></use></svg></button>
+        <div class="section-cookies-settings__title">Настройка cookies 🍪</div>
+        <div class="section-cookies-settings__desc">Выберите, какие файлы cookie мы можем использовать. Обязательные cookies нужны для корректной работы сайта и доступны всегда. Остальные помогают нам улучшать сайт и делать предложения более подходящими для вас.</div>
+        <div class="section-cookies-settings__options">
+          <div class="section-cookies-settings__option">
+            <div class="section-cookies-settings__option-name">
+              <div class="custom-switch">
+                <label class="switch">
+                  <input type="checkbox"/><span class="switch__slider"></span><span class="switch__text">Обязательные</span>
+                </label>
+              </div>
+            </div>
+            <div class="section-cookies-settings__option-text">Нужны для работы сайта, оформления заказов, авторизации и сохранения настроек. Отключить их нельзя.</div>
+          </div>
+          <div class="section-cookies-settings__option">
+            <div class="section-cookies-settings__option-name">
+              <div class="custom-switch">
+                <label class="switch">
+                  <input type="checkbox"/><span class="switch__slider"></span><span class="switch__text">Аналитические</span>
+                </label>
+              </div>
+            </div>
+            <div class="section-cookies-settings__option-text">Помогают нам понимать, как пользователи взаимодействуют с сайтом, находить ошибки и улучшать его работу.</div>
+          </div>
+          <div class="section-cookies-settings__option">
+            <div class="section-cookies-settings__option-name">
+              <div class="custom-switch">
+                <label class="switch">
+                  <input type="checkbox"/><span class="switch__slider"></span><span class="switch__text">Обязательные</span>
+                </label>
+              </div>
+            </div>
+            <div class="section-cookies-settings__option-text">Помогают показывать более релевантные предложения и оценивать эффективность рекламных кампаний.</div>
+          </div>
+        </div>
+        <div class="section-cookies-settings__buttons">
+          <button class="btn btn_accept-coookies">Сохранить настройки</button>
+          <button class="btn btn_settings-coookies">Принять все cookies</button>
+        </div>
+      </div>
+      <div class="mobile-fixed-block"><a class="mobile-fixed-block__link" href=""><svg width="24" height="24"><use xlink:href="./img/sprite.svg#search-grey-icon"></use></svg></a><a class="mobile-fixed-block__link" href="">
+          <div class="mobile-fixed-block__link-count">1</div><svg width="24" height="24"><use xlink:href="./img/sprite.svg#basket-icon"></use></svg></a><a class="mobile-fixed-block__link" href=""><svg width="32" height="32"><use xlink:href="./img/sprite.svg#logo-min"></use></svg></a><a class="mobile-fixed-block__link" href=""><svg width="24" height="24"><use xlink:href="./img/sprite.svg#action-icon"></use></svg></a><a class="mobile-fixed-block__link" href=""><svg width="24" height="24"><use xlink:href="./img/sprite.svg#personal-icon"></use></svg></a></div>
+      <div class="popup-outer-box" id="popup-delivery">
+        <div class="popup-box"><a class="btn-popup-close btn-action-ico ico-close js-popup-close" href=""><svg width="32" height="32"><use xlink:href="./img/sprite.svg#cross-close-icon "></use></svg></a>
+          <div class="popup-content-wrap">
+            <div class="popup-delivery">
+              <div class="popup-delivery__inner">
+                <div class="popup-delivery__left">
+                  <div class="tabs">
+                    <ul class="tabs__list">
+                      <li><svg width="20" height="18" viewBox="0 0 20 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M19.4709 5.79469L18.1266 1.0875C18.0361 0.775232 17.8471 0.500591 17.5878 0.304588C17.3284 0.108585 17.0126 0.00173713 16.6875 0H2.8125C2.48741 0.00173713 2.1716 0.108585 1.91223 0.304588C1.65287 0.500591 1.46386 0.775232 1.37344 1.0875L0.0290624 5.79469C0.00984345 5.86143 6.11116e-05 5.93054 0 6V7.5C0 8.08217 0.135544 8.65634 0.395898 9.17705C0.656252 9.69776 1.03426 10.1507 1.5 10.5V17.25C1.5 17.4489 1.57902 17.6397 1.71967 17.7803C1.86032 17.921 2.05109 18 2.25 18H17.25C17.4489 18 17.6397 17.921 17.7803 17.7803C17.921 17.6397 18 17.4489 18 17.25V10.5C18.4657 10.1507 18.8437 9.69776 19.1041 9.17705C19.3645 8.65634 19.5 8.08217 19.5 7.5V6C19.4999 5.93054 19.4902 5.86143 19.4709 5.79469ZM6 7.5C5.99986 7.88691 5.89996 8.26725 5.70993 8.60428C5.5199 8.94131 5.24617 9.22364 4.91518 9.42401C4.58419 9.62437 4.20713 9.736 3.82041 9.74811C3.43368 9.76022 3.05037 9.67239 2.7075 9.49312C2.65533 9.45251 2.59794 9.41909 2.53688 9.39375C2.21913 9.19033 1.95764 8.91029 1.77645 8.57937C1.59527 8.24845 1.5002 7.87728 1.5 7.5V6.75H6V7.5ZM12 7.5C12 8.09674 11.7629 8.66903 11.341 9.09099C10.919 9.51295 10.3467 9.75 9.75 9.75C9.15326 9.75 8.58097 9.51295 8.15901 9.09099C7.73705 8.66903 7.5 8.09674 7.5 7.5V6.75H12V7.5ZM18 7.5C17.9997 7.87736 17.9045 8.24859 17.7231 8.57952C17.5418 8.91045 17.2801 9.19045 16.9622 9.39375C16.9019 9.41914 16.8452 9.45223 16.7934 9.49219C16.4506 9.67164 16.0673 9.75964 15.6805 9.74769C15.2937 9.73574 14.9166 9.62423 14.5855 9.42395C14.2544 9.22367 13.9805 8.94138 13.7904 8.60436C13.6002 8.26733 13.5002 7.88696 13.5 7.5V6.75H18V7.5Z" fill="currentColor" />
+</svg><span>Самовывоз</span>
+                      </li>
+                      <li><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_3002_55094)">
+<path d="M12.75 4.875C12.75 4.35583 12.904 3.84831 13.1924 3.41663C13.4808 2.98495 13.8908 2.6485 14.3705 2.44982C14.8501 2.25114 15.3779 2.19915 15.8871 2.30044C16.3963 2.40173 16.864 2.65173 17.2312 3.01885C17.5983 3.38596 17.8483 3.85369 17.9496 4.36289C18.0508 4.87209 17.9989 5.39989 17.8002 5.87955C17.6015 6.3592 17.2651 6.76917 16.8334 7.05761C16.4017 7.34605 15.8942 7.5 15.375 7.5C14.6788 7.5 14.0111 7.22344 13.5188 6.73116C13.0266 6.23887 12.75 5.57119 12.75 4.875ZM22.5 16.5C22.5 17.2417 22.2801 17.9667 21.868 18.5834C21.456 19.2001 20.8703 19.6807 20.1851 19.9646C19.4998 20.2484 18.7458 20.3226 18.0184 20.1779C17.291 20.0333 16.6228 19.6761 16.0984 19.1517C15.5739 18.6272 15.2168 17.959 15.0721 17.2316C14.9274 16.5042 15.0016 15.7502 15.2855 15.0649C15.5693 14.3797 16.0499 13.794 16.6666 13.382C17.2833 12.9699 18.0083 12.75 18.75 12.75C19.7446 12.75 20.6984 13.1451 21.4017 13.8484C22.1049 14.5516 22.5 15.5054 22.5 16.5ZM18.75 10.5C18.75 10.3011 18.671 10.1103 18.5303 9.96967C18.3897 9.82902 18.1989 9.75 18 9.75H14.5603L11.7806 6.96938C11.711 6.89964 11.6283 6.84432 11.5372 6.80658C11.4462 6.76884 11.3486 6.74941 11.25 6.74941C11.1514 6.74941 11.0538 6.76884 10.9628 6.80658C10.8717 6.84432 10.789 6.89964 10.7194 6.96938L7.71938 9.96938C7.64964 10.039 7.59432 10.1217 7.55658 10.2128C7.51884 10.3038 7.49941 10.4014 7.49941 10.5C7.49941 10.5986 7.51884 10.6962 7.55658 10.7872C7.59432 10.8783 7.64964 10.961 7.71938 11.0306L11.25 14.5603V18.75C11.25 18.9489 11.329 19.1397 11.4697 19.2803C11.6103 19.421 11.8011 19.5 12 19.5C12.1989 19.5 12.3897 19.421 12.5303 19.2803C12.671 19.1397 12.75 18.9489 12.75 18.75V14.25C12.7501 14.1515 12.7307 14.0539 12.6931 13.9629C12.6555 13.8718 12.6003 13.7891 12.5306 13.7194L9.31031 10.5L11.25 8.56031L13.7194 11.0306C13.7891 11.1003 13.8718 11.1555 13.9629 11.1931C14.0539 11.2307 14.1515 11.2501 14.25 11.25H18C18.1989 11.25 18.3897 11.171 18.5303 11.0303C18.671 10.8897 18.75 10.6989 18.75 10.5ZM9 16.5C9 17.2417 8.78007 17.9667 8.36801 18.5834C7.95596 19.2001 7.37029 19.6807 6.68506 19.9646C5.99984 20.2484 5.24584 20.3226 4.51841 20.1779C3.79098 20.0333 3.1228 19.6761 2.59835 19.1517C2.0739 18.6272 1.71675 17.959 1.57206 17.2316C1.42736 16.5042 1.50162 15.7502 1.78545 15.0649C1.78545 15.0649 2.54993 13.794 3.16661 13.382C3.7833 12.9699 4.50832 12.75 5.25 12.75C5.74246 12.75 6.23009 12.847 6.68506 13.0355C7.14004 13.2239 7.55343 13.5001 7.90165 13.8484C8.24987 14.1966 8.52609 14.61 8.71455 15.0649C8.90301 15.5199 9 16.0075 9 16.5Z" fill="currentColor" />
+<path d="M5.51792 10.1337C5.65425 10.1885 5.80364 10.202 5.94757 10.1725C6.09149 10.1431 6.22361 10.0721 6.32752 9.96824L10.3684 5.93141C10.509 5.79085 10.588 5.60022 10.5881 5.40142C10.5882 5.20262 10.5094 5.01191 10.369 4.87121L8.35056 2.85075C8.21 2.71017 8.01937 2.63114 7.82057 2.63104C7.62177 2.63094 7.43106 2.70977 7.29035 2.85021L3.24944 6.88704C3.10885 7.02761 3.02983 7.21823 3.02973 7.41703C3.02963 7.61583 3.10846 7.80654 3.2489 7.94725L5.26732 9.96771C5.33879 10.0394 5.42404 10.0959 5.51792 10.1337Z" fill="currentColor" />
+</g>
+<defs>
+<clipPath id="clip0_3002_55094">
+<rect width="24" height="24" fill="white" />
+</clipPath>
+</defs>
+</svg><span>Доставка</span>
+                      </li>
+                    </ul>
+                    <div class="tabs__content">
+                      <div>
+                        <div class="popup-delivery__shops">
+                          <div class="popup-delivery__shops-items">
+                            <div class="shop-block">
+                              <div class="shop-block-title"><svg width="24" height="24"><use xlink:href="./img/sprite.svg#store-icon"></use></svg><span>Самовывоз бесплатно с 07:00 до 22:00</span></div>
+                              <div class="shop-block-name">Гипермаркет ВкусДом</div>
+                              <div class="shop-block-address">г. Грозный, проспект Кунта-Хаджи Кишиева, 112</div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div>
+                        <div class="popup-delivery__shops-items">
+                          <div class="popup-delivery__shops-title">Адрес доставки:</div>
+                          <div class="popup-delivery__shops-input">
+                            <div class="popup-delivery__shops-input-label"><span>Город, улица, дом</span><a class="popup-delivery__shops-input-link" href="">
+                                <svg width="24" height="24"><use xlink:href="./img/sprite.svg#compass-icon"></use></svg>Определить</a></div>
+                            <div class="popup-delivery__shops-input-field">
+                              <input type="text" placeholder="Введите адрес, чтобы найти ближайшие магазины">
+                            </div>
+                          </div>
+                          <div class="popup-delivery__delivery-error">
+                            <div class="popup-delivery__delivery-error-title">
+                              <svg width="24" height="24"><use xlink:href="./img/sprite.svg#shop-error-icon"></use></svg>Мы вас не нашли</div>
+                            <div class="popup-delivery__delivery-error-text">Переместите карту к дому или введите адрес вручную</div>
+                            <div class="popup-delivery__delivery-error-field">
+                              <input type="text" value="" placeholder="Введите адрес, чтобы найти ближайшие магазины">
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div><a class="btn btn_big popup-delivery__btn" href="">Оплатить</a>
+                </div>
+                <div class="popup-delivery__right">
+                  <div class="popup-delivery__tabs">
+                    <div class="tabs">
+                      <ul class="tabs__list">
+                        <li>На карте</li>
+                        <li>Списком</li>
+                      </ul>
+                      <div class="tabs__content">
+                        <div>
+                          <div class="popup-delivery__map"><img src="./img/map-popup.jpg" alt=""></div>
+                        </div>
+                        <div>
+                          <div class="popup-delivery__list">
+                            <div class="popup-delivery__list-item">
+                              <div class="popup-delivery__list-title">
+                                <div class="popup-delivery__list-name">Гипермаркет ВкусДом</div><svg width="24" height="24"><use xlink:href="./img/sprite.svg#store-icon"></use></svg>
+                              </div>
+                              <div class="popup-delivery__list-address">г. Грозный, проспект Кунта-Хаджи Кишиева, 112</div>
+                              <div class="popup-delivery__list-time">с 07:00 до 22:00</div>
+                            </div>
+                            <div class="popup-delivery__list-item active">
+                              <div class="popup-delivery__list-title">
+                                <div class="popup-delivery__list-name">Гипермаркет ВкусДом</div><svg width="24" height="24"><use xlink:href="./img/sprite.svg#store-icon"></use></svg>
+                              </div>
+                              <div class="popup-delivery__list-address">г. Грозный, проспект Кунта-Хаджи Кишиева, 112</div>
+                              <div class="popup-delivery__list-time">с 07:00 до 22:00</div>
+                            </div>
+                            <div class="popup-delivery__list-item">
+                              <div class="popup-delivery__list-title">
+                                <div class="popup-delivery__list-name">Гипермаркет ВкусДом</div><svg width="24" height="24"><use xlink:href="./img/sprite.svg#store-icon"></use></svg>
+                              </div>
+                              <div class="popup-delivery__list-address">г. Грозный, проспект Кунта-Хаджи Кишиева, 112</div>
+                              <div class="popup-delivery__list-time">с 07:00 до 22:00</div>
+                            </div>
+                            <div class="popup-delivery__list-item">
+                              <div class="popup-delivery__list-title">
+                                <div class="popup-delivery__list-name">Гипермаркет ВкусДом</div><svg width="24" height="24"><use xlink:href="./img/sprite.svg#store-icon"></use></svg>
+                              </div>
+                              <div class="popup-delivery__list-address">г. Грозный, проспект Кунта-Хаджи Кишиева, 112</div>
+                              <div class="popup-delivery__list-time">с 07:00 до 22:00</div>
+                            </div>
+                            <div class="popup-delivery__list-item">
+                              <div class="popup-delivery__list-title">
+                                <div class="popup-delivery__list-name">Гипермаркет ВкусДом</div><svg width="24" height="24"><use xlink:href="./img/sprite.svg#store-icon"></use></svg>
+                              </div>
+                              <div class="popup-delivery__list-address">г. Грозный, проспект Кунта-Хаджи Кишиева, 112</div>
+                              <div class="popup-delivery__list-time">с 07:00 до 22:00</div>
+                            </div>
+                            <div class="popup-delivery__list-item">
+                              <div class="popup-delivery__list-title">
+                                <div class="popup-delivery__list-name">Гипермаркет ВкусДом</div><svg width="24" height="24"><use xlink:href="./img/sprite.svg#store-icon"></use></svg>
+                              </div>
+                              <div class="popup-delivery__list-address">г. Грозный, проспект Кунта-Хаджи Кишиева, 112</div>
+                              <div class="popup-delivery__list-time">с 07:00 до 22:00</div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="./libs/js/jquery.min.js"></script>
+    <script src="./libs/js/inputmask.min.js"></script>
+    <script src="./libs/js/nouislider.js"></script>
+    <script src="./libs/js/lightTabs.js"></script>
+    <script src="./libs/js/fancybox.umd.js"></script>
+    <script src="./libs/js/swiper-bundle.min.js"></script>
+    <script src="./libs/js/slimselect.js"></script>
+    <script src="./js/main.js"></script>
+  </body>
+</html>
