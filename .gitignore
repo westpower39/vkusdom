@@ -1,0 +1,3 @@
+# Ignore an entire folder (always include the trailing slash)
+upload/
+bitrix/
