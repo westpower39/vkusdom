@@ -144,9 +144,11 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   });
-  
+
   //collapse block
-  const collapseButtons = document.querySelectorAll('.catalog-detail__description-shop-name');
+  const collapseButtons = document.querySelectorAll(
+    '.catalog-detail__description-shop-name',
+  );
   collapseButtons.forEach((button) => {
     const parentBlock = button.closest('.catalog-detail__description-shop');
     button.addEventListener('click', function (e) {
@@ -209,63 +211,63 @@ document.addEventListener('DOMContentLoaded', () => {
     },
   });
   //range slider
-  let stepsSlider = document.getElementById( 'steps-slider' );
-  if ( stepsSlider !== null && stepsSlider !== undefined ) {
-    let input0 = document.getElementById( 'input-with-keypress-0' );
-    let input1 = document.getElementById( 'input-with-keypress-1' );
-    let inputs = [ input0, input1 ];
+  let stepsSlider = document.getElementById('steps-slider');
+  if (stepsSlider !== null && stepsSlider !== undefined) {
+    let input0 = document.getElementById('input-with-keypress-0');
+    let input1 = document.getElementById('input-with-keypress-1');
+    let inputs = [input0, input1];
     let format = {
-      to: function ( value ) {
-        return Number( Math.round( value ) );
+      to: function (value) {
+        return Number(Math.round(value));
       },
-      from: function ( value ) {
-        return Number( Math.round( value ) );
+      from: function (value) {
+        return Number(Math.round(value));
       },
     };
-    noUiSlider.create( stepsSlider, {
-      start: [ 0, 1800 ],
+    noUiSlider.create(stepsSlider, {
+      start: [0, 1800],
       connect: true,
-      tooltips: [ true, true ],
+      tooltips: [true, true],
       format: format,
       range: {
         min: 0,
         max: 1800,
       },
-    } );
+    });
 
-    stepsSlider.noUiSlider.on( 'update', function ( values, handle ) {
-      inputs[ handle ].value = values[ handle ];
-    } );
+    stepsSlider.noUiSlider.on('update', function (values, handle) {
+      inputs[handle].value = values[handle];
+    });
   }
 
   //range slider mobile
-  let stepsSlider2 = document.getElementById( 'steps-slider2' );
-  if ( stepsSlider2 !== null && stepsSlider2 !== undefined ) {
-    let input2 = document.getElementById( 'input-with-keypress-2' );
-    let input3 = document.getElementById( 'input-with-keypress-3' );
-    let inputs2 = [ input2, input3 ];
+  let stepsSlider2 = document.getElementById('steps-slider2');
+  if (stepsSlider2 !== null && stepsSlider2 !== undefined) {
+    let input2 = document.getElementById('input-with-keypress-2');
+    let input3 = document.getElementById('input-with-keypress-3');
+    let inputs2 = [input2, input3];
     let format2 = {
-      to: function ( value ) {
-        return Number( Math.round( value ) );
+      to: function (value) {
+        return Number(Math.round(value));
       },
-      from: function ( value ) {
-        return Number( Math.round( value ) );
+      from: function (value) {
+        return Number(Math.round(value));
       },
     };
-    noUiSlider.create( stepsSlider2, {
-      start: [ 0, 1800 ],
+    noUiSlider.create(stepsSlider2, {
+      start: [0, 1800],
       connect: true,
-      tooltips: [ true, true ],
+      tooltips: [true, true],
       format: format2,
       range: {
         min: 0,
         max: 1800,
       },
-    } );
+    });
 
-    stepsSlider2.noUiSlider.on( 'update', function ( values, handle ) {
-      inputs2[ handle ].value = values[ handle ];
-    } );
+    stepsSlider2.noUiSlider.on('update', function (values, handle) {
+      inputs2[handle].value = values[handle];
+    });
   }
 
   //mask phone
@@ -276,39 +278,90 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   //header-catalog-menu
-  const categories = document.querySelectorAll('[data-category]');
-  categories.forEach(category => {
-    const categoryValue = category.dataset.category;
-    const subcategory = document.querySelector(`[data-subcategory="${categoryValue}"]`);
-    if (subcategory) {
-      category.addEventListener('mouseenter', function() {
-        subcategory.style.display = 'block';
+  const catalogMenuInner = document.querySelector('.header-catalog-menu__inner');
+
+  if (catalogMenuInner) {
+    const categories = catalogMenuInner.querySelectorAll('[data-category]');
+    const subcategories = catalogMenuInner.querySelectorAll('[data-subcategory]');
+
+    // Переключение активной подкатегории при наведении на ссылку категории
+    categories.forEach((category) => {
+      category.addEventListener('mouseenter', () => {
+        const value = category.dataset.category;
+
+        categories.forEach((c) => {
+          c.classList.toggle('is-active', c === category);
+        });
+
+        subcategories.forEach((sub) => {
+          sub.classList.toggle('active', sub.dataset.subcategory === value);
+        });
       });
-      category.addEventListener('mouseleave', function() {
-        subcategory.style.display = 'none';
-      });
-    }
-  } );
-  const headerCatalogButton = document.querySelector( '.header-search__catalog-button' );
-  const body = document.querySelector( 'body' );
-  headerCatalogButton?.addEventListener('mouseenter', function() {
+    });
+
+    // Скрываем все подкатегории, только когда курсор ушёл из всего меню
+    catalogMenuInner.addEventListener('mouseleave', () => {
+      categories.forEach((c) => c.classList.remove('is-active'));
+      subcategories.forEach((sub) => sub.classList.remove('active'));
+    });
+  }
+
+  const headerCatalogButton = document.querySelector(
+    '.header-search__catalog-button',
+  );
+  const body = document.querySelector('body');
+  headerCatalogButton?.addEventListener('mouseenter', function () {
     body.classList.add('header-catalog-menu-show');
-  } );
-  const headerCatalogMenu = document.querySelector( '.header-catalog-menu' );
-   headerCatalogMenu?.addEventListener('mouseleave', function() {
+  });
+  const headerCatalogMenu = document.querySelector('.header-catalog-menu');
+  headerCatalogMenu?.addEventListener('mouseleave', function () {
     body.classList.remove('header-catalog-menu-show');
-  } );
+  });
+
+  //lk
+  const lkMenuButton = document.querySelector('.mobile-fixed-block__lk');
+  lkMenuButton?.addEventListener('click', function () {
+    document.querySelector('body').classList.add('open-lk-menu');
+  });
+  const lkMenuClose = document.querySelector('.lk-page__menu-back');
+  lkMenuClose?.addEventListener('click', function () {
+    document.querySelector('body').classList.remove('open-lk-menu');
+  });
+
+  const profileEditButton = document.querySelector(
+    '.lk-page__profile-edit-link',
+  );
+  profileEditButton?.addEventListener('click', function () {
+    const inputs = document.querySelectorAll('.lk-page__profile-edit input');
+    inputs.forEach((input) => {
+      input.disabled = false;
+    });
+  });
+  
+  const lkOrderButtons = document.querySelectorAll(
+  '.lk-orders__item-arrow',
+  );
+  lkOrderButtons.forEach((button) => {
+    const parentBlock = button.closest('.lk-orders__item');
+    button.addEventListener('click', function (e) {
+      if (!parentBlock.classList.contains('open')) {
+        parentBlock.classList.add('open');
+      } else {
+        parentBlock.classList.remove('open');
+      }
+    });
+  });
 
   //toggle filter mobile
   const toggleFilter = document.querySelector('.btn_mobile-filter');
   const filterBlock = document.querySelector('.catalog-filter_mobile');
   toggleFilter?.addEventListener('click', function (e) {
     filterBlock.classList.add('open-filter');
-  } );
+  });
   const closeFilter = document.querySelector('.catalog-filter__close');
   closeFilter?.addEventListener('click', function (e) {
     filterBlock.classList.remove('open-filter');
-  } );
+  });
 
   //toggle filter blocks
   const toggleFilterButtons = document.querySelectorAll(
@@ -326,7 +379,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   });
-
 
   //counter
   document.querySelectorAll('.counter__plus').forEach((btn) => {
@@ -394,7 +446,6 @@ document.addEventListener('DOMContentLoaded', () => {
       el: '.section-popular-slider-pagination',
       clickable: true,
     },
-
   });
 
   const swiperSectionProductsSlider01 = new Swiper(
@@ -529,13 +580,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Initialize the Thumbs Swiper
   const galleryThumbs = new Swiper('.product-slider-thumbs', {
-   
     slidesPerView: 5,
     spaceBetween: 8,
-     loop: true,
+    loop: true,
 
-      freeMode: true,
-      watchSlidesProgress: true,
+    freeMode: true,
+    watchSlidesProgress: true,
     // Configure as needed
   });
 
@@ -546,29 +596,26 @@ document.addEventListener('DOMContentLoaded', () => {
       swiper: galleryThumbs, // Link thumbs instance
     },
     pagination: {
-        el: '.product-slider-pagination',
-        clickable: true,
-      },
-    
+      el: '.product-slider-pagination',
+      clickable: true,
+    },
   });
-} );
-
-// При фокусе на input - добавляем класс в body
-document.addEventListener('DOMContentLoaded', function() {
-    const inputs = document.querySelectorAll('.header-search__input');
-    
-    inputs.forEach(input => {
-        input.addEventListener('focus', function() {
-            document.body.classList.add('search-active');
-        });
-        
-        input.addEventListener('blur', function() {
-            document.body.classList.remove('search-active');
-        });
-    });
 });
 
+// При фокусе на input - добавляем класс в body
+document.addEventListener('DOMContentLoaded', function () {
+  const inputs = document.querySelectorAll('.header-search__input');
 
+  inputs.forEach((input) => {
+    input.addEventListener('focus', function () {
+      document.body.classList.add('search-active');
+    });
+
+    input.addEventListener('blur', function () {
+      document.body.classList.remove('search-active');
+    });
+  });
+});
 
 
 jQuery( document ).ready( function ( $ ) {
