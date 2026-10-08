@@ -72,6 +72,21 @@ return function (RoutingConfigurator $routes) {
 		$routes->post('orders/{id}/repeat', [Controller\Checkout::class, 'repeatOrder'])->where('id', $id);
 		$routes->post('orders/{id}/payment', [Controller\Checkout::class, 'orderPayment'])->where('id', $id);
 
+		// Personal account
+		$routes->get('profile', [Controller\Profile::class, 'profile']);
+		$routes->put('profile', [Controller\Profile::class, 'updateProfile']);
+		$routes->put('profile/notifications', [Controller\Profile::class, 'updateNotifications']);
+		$routes->get('order-profiles', [Controller\Profile::class, 'orderProfiles']);
+		$routes->get('order-profiles/fields', [Controller\Profile::class, 'orderProfileFields']);
+		$routes->post('order-profiles', [Controller\Profile::class, 'createOrderProfile']);
+		$routes->put('order-profiles/{id}', [Controller\Profile::class, 'updateOrderProfile'])->where('id', $id);
+		$routes->delete('order-profiles/{id}', [Controller\Profile::class, 'deleteOrderProfile'])->where('id', $id);
+		$routes->get('ratings/products', [Controller\Profile::class, 'ratings']);
+		$routes->put('ratings/products/{productId}', [Controller\Profile::class, 'setRating'])->where('productId', $id);
+		$routes->post('feedback', [Controller\Profile::class, 'feedback']);
+		$routes->put('devices/{token}', [Controller\Profile::class, 'registerDevice'])->where('token', '[A-Za-z0-9:_\-]+');
+		$routes->delete('devices/{token}', [Controller\Profile::class, 'unregisterDevice'])->where('token', '[A-Za-z0-9:_\-]+');
+
 		// Must stay last: JSON 404 for unknown API paths instead of the site 404 page.
 		$routes->get('{path}', [Controller\System::class, 'notFound'])->where('path', '.*');
 	});
