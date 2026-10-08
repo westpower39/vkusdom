@@ -22,6 +22,22 @@ return function (RoutingConfigurator $routes) {
 
 		$routes->get('ping', [Controller\System::class, 'ping']);
 
+		// Content
+		$routes->get('banners', [Controller\Content::class, 'banners']);
+		$routes->get('promotions', [Controller\Content::class, 'promotions']);
+		$routes->get('promotions/{id}', [Controller\Content::class, 'promotion'])->where('id', $id);
+		$routes->get('brands', [Controller\Content::class, 'brands']);
+		$routes->get('pages', [Controller\Content::class, 'pages']);
+
+		// Catalog
+		$routes->get('catalog/sections', [Controller\Catalog::class, 'sections']);
+		$routes->get('catalog/sections/{id}', [Controller\Catalog::class, 'section'])->where('id', $id);
+		$routes->get('catalog/sections/{id}/products', [Controller\Catalog::class, 'sectionProducts'])->where('id', $id);
+		$routes->get('catalog/sections/{id}/filters', [Controller\Catalog::class, 'sectionFilters'])->where('id', $id);
+		$routes->get('catalog/products', [Controller\Catalog::class, 'products']);
+		$routes->get('catalog/products/filters', [Controller\Catalog::class, 'productsFilters']);
+		$routes->get('catalog/products/{id}', [Controller\Catalog::class, 'product'])->where('id', $id);
+
 		// Auth
 		$routes->post('auth/guest', [Controller\Auth::class, 'guest']);
 		$routes->post('auth/verifications', [Controller\Auth::class, 'createVerification']);
