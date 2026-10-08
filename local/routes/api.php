@@ -57,6 +57,11 @@ return function (RoutingConfigurator $routes) {
 		$routes->post('cart/promo-codes', [Controller\Cart::class, 'addPromoCode']);
 		$routes->delete('cart/promo-codes/{code}', [Controller\Cart::class, 'deletePromoCode'])->where('code', '[^/]+');
 
+		// Favorites
+		$routes->get('favorites', [Controller\Favorite::class, 'favorites']);
+		$routes->put('favorites/{productId}', [Controller\Favorite::class, 'add'])->where('productId', $id);
+		$routes->delete('favorites/{productId}', [Controller\Favorite::class, 'delete'])->where('productId', $id);
+
 		// Must stay last: JSON 404 for unknown API paths instead of the site 404 page.
 		$routes->get('{path}', [Controller\System::class, 'notFound'])->where('path', '.*');
 	});
