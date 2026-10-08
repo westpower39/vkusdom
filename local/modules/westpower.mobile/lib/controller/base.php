@@ -9,6 +9,7 @@ use Bitrix\Main\HttpResponse;
 use Bitrix\Main\Response;
 use Westpower\Mobile\Auth\AuthContext;
 use Westpower\Mobile\Auth\TokenService;
+use Westpower\Mobile\Config;
 use Westpower\Mobile\Dictionary\ErrorCode;
 use Westpower\Mobile\Exception\ApiException;
 
@@ -59,7 +60,14 @@ abstract class Base extends Controller
 		{
 			Application::getInstance()->getExceptionHandler()->writeToLog($e);
 
-			return $this->addApiError(ErrorCode::INTERNAL_ERROR, 'Внутренняя ошибка сервера');
+			$details = Config::getBool('debug_errors') ? [
+				'exception' => get_class($e),
+				'message' => $e->getMessage(),
+				'file' => str_replace($_SERVER['DOCUMENT_ROOT'] ?? '', '', $e->getFile()) . ':' . $e->getLine(),
+				'trace' => array_slice(explode("\n", $e->getTraceAsString()), 0, 8),
+			] : null;
+
+			return $this->addApiError(ErrorCode::INTERNAL_ERROR, 'Внутренняя ошибка сервера', $details);
 		}
 	}
 

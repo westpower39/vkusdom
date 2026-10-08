@@ -8,6 +8,8 @@
 $westpower_mobile_default_option = [
 	// General
 	'public_url' => '',
+	// Show exception details in INTERNAL_ERROR responses (test stand only)
+	'debug_errors' => 'N',
 
 	// Catalog
 	'catalog_excluded_sections' => '',
