@@ -136,13 +136,9 @@ final class SectionService
 
 	public function productsCount(int $sectionId): int
 	{
-		return (int)\CIBlockElement::GetList([], [
-			'IBLOCK_ID' => $this->iblockId,
-			'SECTION_ID' => $sectionId,
-			'INCLUDE_SUBSECTIONS' => 'Y',
-			'ACTIVE' => 'Y',
-			'ACTIVE_DATE' => 'Y',
-		], []);
+		$repository = new ProductRepository();
+
+		return $repository->count($repository->listFilter() + ['SECTION_ID' => $sectionId, 'INCLUDE_SUBSECTIONS' => 'Y']);
 	}
 
 	/**

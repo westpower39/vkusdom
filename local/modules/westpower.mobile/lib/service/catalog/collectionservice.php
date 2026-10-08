@@ -70,7 +70,7 @@ final class CollectionService
 		}
 		$repository = new ProductRepository();
 
-		return $repository->count($repository->baseFilter() + $scope->filter) > 0;
+		return $repository->count($repository->listFilter() + $scope->filter) > 0;
 	}
 
 	public function meta(string $code): array

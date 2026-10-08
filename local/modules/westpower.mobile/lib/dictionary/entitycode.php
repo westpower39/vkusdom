@@ -29,6 +29,6 @@ final class EntityCode
 	// Catalog section user field: "popular category" checkbox
 	public const SECTION_UF_POPULAR = 'UF_POPULAR';
 
-	// Pay system handlers that are paid online (ACTION_FILE)
-	public const ONLINE_PAY_HANDLERS = ['yandexcheckout', 'yookassa'];
+	// Pay system handlers that are never paid online (ACTION_FILE prefixes): internal account, invoices
+	public const OFFLINE_PAY_HANDLER_PREFIXES = ['inner', 'bill'];
 }

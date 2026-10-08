@@ -3,6 +3,7 @@
 namespace Westpower\Mobile\Service\Catalog;
 
 use Bitrix\Main\Loader;
+use Westpower\Mobile\Config;
 use Westpower\Mobile\Exception\ApiException;
 use Westpower\Mobile\Service\EntityResolver;
 
@@ -35,6 +36,21 @@ final class ProductRepository
 			'ACTIVE' => 'Y',
 			'ACTIVE_DATE' => 'Y',
 		];
+	}
+
+	/**
+	 * Filter of products shown in lists (sections, collections, search, filters):
+	 * visible products, optionally only those with the retail price.
+	 */
+	public function listFilter(): array
+	{
+		$filter = $this->baseFilter();
+		if (Config::getBool('hide_without_price'))
+		{
+			$filter['>CATALOG_PRICE_' . EntityResolver::priceTypeId()] = 0;
+		}
+
+		return $filter;
 	}
 
 	public function count(array $filter): int

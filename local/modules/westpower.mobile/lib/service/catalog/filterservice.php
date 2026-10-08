@@ -276,7 +276,7 @@ final class FilterService
 
 		$definitions = $this->definitions($scope);
 		$ids = array_slice(
-			$this->repository->ids($this->repository->baseFilter() + $scope->filter),
+			$this->repository->ids($this->repository->listFilter() + $scope->filter),
 			0,
 			max(100, Config::getInt('filter_max_products'))
 		);

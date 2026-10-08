@@ -36,7 +36,7 @@ final class ProductListService
 			return ['items' => [], 'pagination' => Pagination::make($page, $limit, 0)];
 		}
 
-		$filter = $this->repository->baseFilter() + $scope->filter;
+		$filter = $this->repository->listFilter() + $scope->filter;
 		if (!empty($applied))
 		{
 			$ids = $this->filters->matchingIds($scope, $applied);
@@ -61,15 +61,17 @@ final class ProductListService
 	{
 		$sort = $sort === null || $sort === '' ? SortCode::POPULAR : (string)$sort;
 		$priceField = 'CATALOG_PRICE_' . EntityResolver::priceTypeId();
+		// Unavailable products always go last (like HIDE_NOT_AVAILABLE = L in catalog components).
+		$availableFirst = ['CATALOG_AVAILABLE' => 'DESC'];
 
 		switch ($sort)
 		{
 			case SortCode::POPULAR:
-				return ['SHOW_COUNTER' => 'DESC', 'SORT' => 'ASC', 'ID' => 'DESC'];
+				return $availableFirst + ['SHOW_COUNTER' => 'DESC', 'SORT' => 'ASC', 'ID' => 'DESC'];
 			case SortCode::PRICE_ASC:
-				return [$priceField => 'ASC', 'ID' => 'ASC'];
+				return $availableFirst + [$priceField => 'ASC', 'ID' => 'ASC'];
 			case SortCode::PRICE_DESC:
-				return [$priceField => 'DESC', 'ID' => 'ASC'];
+				return $availableFirst + [$priceField => 'DESC', 'ID' => 'ASC'];
 		}
 
 		throw ApiException::validation(

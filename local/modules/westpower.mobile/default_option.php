@@ -13,6 +13,8 @@ $westpower_mobile_default_option = [
 
 	// Catalog
 	'catalog_excluded_sections' => '',
+	// Products without the retail price cannot be bought: hide them from lists, search and filters
+	'hide_without_price' => 'Y',
 	'filter_max_products' => '5000',
 
 	// Home screen layout (GET /home): one block per line, in display order.

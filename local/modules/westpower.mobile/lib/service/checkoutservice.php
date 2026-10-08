@@ -108,7 +108,7 @@ final class CheckoutService
 			$paymentMethods[] = [
 				'id' => (int)$paySystem['ID'],
 				'name' => (string)$paySystem['NAME'],
-				'isOnline' => in_array((string)$paySystem['ACTION_FILE'], EntityCode::ONLINE_PAY_HANDLERS, true),
+				'isOnline' => self::isOnlinePaySystem((int)$paySystem['ID']),
 			];
 		}
 
@@ -217,6 +217,11 @@ final class CheckoutService
 				throw ApiException::validation('Выберите точку самовывоза', 'pickupPointId');
 			}
 			$shipment->setStoreId($pointId);
+			// The store is kept only if it is attached to the pickup delivery service (site settings).
+			if ((int)$shipment->getStoreId() !== $pointId)
+			{
+				$notStored[] = 'Точка самовывоза: ' . $points[$pointId]['name'] . ', ' . $points[$pointId]['address'];
+			}
 		}
 		else
 		{
@@ -492,12 +497,25 @@ final class CheckoutService
 	}
 
 	/**
-	 * Online pay systems are recognized by their handler, not by ID.
+	 * Online = paid by card through a payment handler: not cash, not the internal account, not an invoice.
+	 * Recognized by pay system fields, not by ID or a fixed list of handlers.
 	 */
 	public static function isOnlinePaySystem(int $paySystemId): bool
 	{
-		$row = PaySystemActionTable::getList(['filter' => ['=ID' => $paySystemId], 'select' => ['ACTION_FILE']])->fetch();
+		$row = PaySystemActionTable::getList(['filter' => ['=ID' => $paySystemId], 'select' => ['ACTION_FILE', 'IS_CASH']])->fetch();
+		if (!$row || $row['IS_CASH'] === 'Y')
+		{
+			return false;
+		}
 
-		return $row && in_array((string)$row['ACTION_FILE'], EntityCode::ONLINE_PAY_HANDLERS, true);
+		foreach (EntityCode::OFFLINE_PAY_HANDLER_PREFIXES as $prefix)
+		{
+			if (strpos((string)$row['ACTION_FILE'], $prefix) === 0)
+			{
+				return false;
+			}
+		}
+
+		return true;
 	}
 }
