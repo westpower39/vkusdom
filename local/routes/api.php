@@ -62,6 +62,16 @@ return function (RoutingConfigurator $routes) {
 		$routes->put('favorites/{productId}', [Controller\Favorite::class, 'add'])->where('productId', $id);
 		$routes->delete('favorites/{productId}', [Controller\Favorite::class, 'delete'])->where('productId', $id);
 
+		// Checkout and orders
+		$routes->get('checkout/options', [Controller\Checkout::class, 'options']);
+		$routes->get('checkout/slots', [Controller\Checkout::class, 'slots']);
+		$routes->post('checkout/calculation', [Controller\Checkout::class, 'calculation']);
+		$routes->post('orders', [Controller\Checkout::class, 'createOrder']);
+		$routes->get('orders', [Controller\Checkout::class, 'orders']);
+		$routes->get('orders/{id}', [Controller\Checkout::class, 'order'])->where('id', $id);
+		$routes->post('orders/{id}/repeat', [Controller\Checkout::class, 'repeatOrder'])->where('id', $id);
+		$routes->post('orders/{id}/payment', [Controller\Checkout::class, 'orderPayment'])->where('id', $id);
+
 		// Must stay last: JSON 404 for unknown API paths instead of the site 404 page.
 		$routes->get('{path}', [Controller\System::class, 'notFound'])->where('path', '.*');
 	});
