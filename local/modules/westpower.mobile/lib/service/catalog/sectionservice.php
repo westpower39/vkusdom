@@ -4,7 +4,6 @@ namespace Westpower\Mobile\Service\Catalog;
 
 use Bitrix\Main\Loader;
 use Bitrix\Main\UserFieldTable;
-use Westpower\Mobile\Config;
 use Westpower\Mobile\Dictionary\EntityCode;
 use Westpower\Mobile\Exception\ApiException;
 use Westpower\Mobile\Service\EntityResolver;
@@ -12,14 +11,12 @@ use Westpower\Mobile\Service\Formatter;
 
 /**
  * Catalog sections: tree from the iblock root, section detail, popular and child sections.
- * Sections listed in "catalog_excluded_sections" (with their subtrees) are hidden from the app.
  */
 final class SectionService
 {
 	private const SELECT = ['ID', 'IBLOCK_ID', 'NAME', 'PICTURE', 'DETAIL_PICTURE', 'DEPTH_LEVEL', 'IBLOCK_SECTION_ID', 'LEFT_MARGIN', 'RIGHT_MARGIN', 'SORT'];
 
 	private int $iblockId;
-	private ?array $excludedRanges = null;
 
 	public function __construct()
 	{
@@ -170,7 +167,7 @@ final class SectionService
 	}
 
 	/**
-	 * Active, globally active, not excluded sections.
+	 * Active, globally active sections (a section is hidden from the app by deactivating it).
 	 */
 	private function fetch(array $filter, array $order = ['LEFT_MARGIN' => 'ASC']): array
 	{
@@ -190,10 +187,7 @@ final class SectionService
 		$result = \CIBlockSection::GetList($order, $filter, false, $select);
 		while ($row = $result->Fetch())
 		{
-			if (!$this->isExcluded($row))
-			{
-				$rows[] = $row;
-			}
+			$rows[] = $row;
 		}
 
 		if ($order === ['LEFT_MARGIN' => 'ASC'])
@@ -210,32 +204,5 @@ final class SectionService
 		}
 
 		return $rows;
-	}
-
-	private function isExcluded(array $row): bool
-	{
-		if ($this->excludedRanges === null)
-		{
-			$this->excludedRanges = [];
-			$codes = Config::getCodes('catalog_excluded_sections');
-			if (!empty($codes))
-			{
-				$result = \CIBlockSection::GetList([], ['IBLOCK_ID' => $this->iblockId, 'CODE' => $codes], false, ['ID', 'LEFT_MARGIN', 'RIGHT_MARGIN']);
-				while ($excluded = $result->Fetch())
-				{
-					$this->excludedRanges[] = [(int)$excluded['LEFT_MARGIN'], (int)$excluded['RIGHT_MARGIN']];
-				}
-			}
-		}
-
-		foreach ($this->excludedRanges as [$left, $right])
-		{
-			if ((int)$row['LEFT_MARGIN'] >= $left && (int)$row['RIGHT_MARGIN'] <= $right)
-			{
-				return true;
-			}
-		}
-
-		return false;
 	}
 }

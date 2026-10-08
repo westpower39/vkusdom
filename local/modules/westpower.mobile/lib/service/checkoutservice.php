@@ -208,9 +208,6 @@ final class CheckoutService
 			$shipmentItems->createItem($basketItem)->setQuantity($basketItem->getQuantity());
 		}
 
-		$comment = trim((string)($input['comment'] ?? ''));
-		$notStored = [];
-
 		if ($methodCode === 'pickup')
 		{
 			$pointId = (int)($input['pickupPointId'] ?? 0);
@@ -219,12 +216,8 @@ final class CheckoutService
 			{
 				throw ApiException::validation('Выберите точку самовывоза', 'pickupPointId');
 			}
+			// Kept by sale only if the store is attached to the pickup delivery service (site settings).
 			$shipment->setStoreId($pointId);
-			// The store is kept only if it is attached to the pickup delivery service (site settings).
-			if ((int)$shipment->getStoreId() !== $pointId)
-			{
-				$notStored[] = 'Точка самовывоза: ' . $points[$pointId]['name'] . ', ' . $points[$pointId]['address'];
-			}
 		}
 		else
 		{
@@ -245,9 +238,9 @@ final class CheckoutService
 			];
 			foreach ($values as $code => $value)
 			{
-				if ($value !== null && $value !== '' && !$this->setProperty($order, $code, $value) && $code === PropertyCode::ORDER_DELIVERY_ADDRESS)
+				if ($value !== null && $value !== '')
 				{
-					$notStored[] = 'Адрес: ' . $value;
+					$this->setProperty($order, $code, $value);
 				}
 			}
 		}
@@ -255,10 +248,7 @@ final class CheckoutService
 		if (!empty($input['slot']) && is_array($input['slot']))
 		{
 			$slotValue = $this->slotValue($method['id'], (string)($input['slot']['date'] ?? ''), (int)($input['slot']['id'] ?? 0));
-			if (!$this->setProperty($order, PropertyCode::ORDER_DELIVERY_TIME, $slotValue))
-			{
-				$notStored[] = 'Время: ' . $slotValue;
-			}
+			$this->setProperty($order, PropertyCode::ORDER_DELIVERY_TIME, $slotValue);
 		}
 
 		if (!empty($input['replacement']))
@@ -268,10 +258,7 @@ final class CheckoutService
 
 		$this->fillContacts($order, $context, $profile);
 
-		if (!empty($notStored))
-		{
-			$comment = trim($comment . "\n" . implode("\n", $notStored));
-		}
+		$comment = trim((string)($input['comment'] ?? ''));
 		if ($comment !== '')
 		{
 			$order->setField('USER_DESCRIPTION', $comment);
@@ -438,7 +425,10 @@ final class CheckoutService
 		}
 	}
 
-	private function setProperty(Order $order, string $code, $value): bool
+	/**
+	 * Order properties are site settings: a property that does not exist is skipped.
+	 */
+	private function setProperty(Order $order, string $code, $value): void
 	{
 		foreach ($order->getPropertyCollection() as $property)
 		{
@@ -446,11 +436,9 @@ final class CheckoutService
 			{
 				$property->setValue($value);
 
-				return true;
+				return;
 			}
 		}
-
-		return false;
 	}
 
 	private function setPropertyIfEmpty(Order $order, string $code, string $value): void
