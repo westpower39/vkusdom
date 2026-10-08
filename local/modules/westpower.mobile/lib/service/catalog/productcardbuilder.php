@@ -3,7 +3,6 @@
 namespace Westpower\Mobile\Service\Catalog;
 
 use Bitrix\Catalog\MeasureRatioTable;
-use Bitrix\Catalog\MeasureTable;
 use Bitrix\Catalog\PriceTable;
 use Bitrix\Catalog\ProductTable;
 use Bitrix\Main\Loader;
@@ -286,8 +285,9 @@ final class ProductCardBuilder
 		if (self::$measures === null)
 		{
 			self::$measures = [];
-			$rows = MeasureTable::getList(['select' => ['ID', 'CODE', 'SYMBOL', 'SYMBOL_RUS', 'IS_DEFAULT']]);
-			while ($row = $rows->fetch())
+			// CCatalogMeasure fills localized symbols of standard measures (empty in the table itself).
+			$rows = \CCatalogMeasure::getList([], [], false, false, ['ID', 'CODE', 'SYMBOL', 'SYMBOL_RUS', 'IS_DEFAULT']);
+			while ($row = $rows->Fetch())
 			{
 				$measure = [
 					'name' => (string)($row['SYMBOL_RUS'] ?: $row['SYMBOL']),
