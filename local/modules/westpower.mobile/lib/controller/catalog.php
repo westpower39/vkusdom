@@ -3,13 +3,14 @@
 namespace Westpower\Mobile\Controller;
 
 use Westpower\Mobile\Exception\ApiException;
+use Westpower\Mobile\Service\Catalog\CollectionService;
 use Westpower\Mobile\Service\Catalog\ProductDetailService;
 use Westpower\Mobile\Service\Catalog\ProductListService;
 use Westpower\Mobile\Service\Catalog\ProductScope;
 use Westpower\Mobile\Service\Catalog\SectionService;
 
 /**
- * Catalog: sections, product lists, filters, product detail, search.
+ * Catalog: sections, collections, product lists, filters, product detail, search.
  */
 final class Catalog extends Base
 {
@@ -43,6 +44,24 @@ final class Catalog extends Base
 
 			return (new ProductListService())->filters(ProductScope::section($id), $this->listQuery());
 		});
+	}
+
+	/** GET /api/v1/catalog/collections/{code}/products */
+	public function collectionProductsAction(string $code)
+	{
+		return $this->respond(fn () => (new CollectionService())->products($code, $this->listQuery(), $this->context()));
+	}
+
+	/** GET /api/v1/catalog/collections/{code}/filters */
+	public function collectionFiltersAction(string $code)
+	{
+		return $this->respond(fn () => (new CollectionService())->filters($code, $this->listQuery()));
+	}
+
+	/** GET /api/v1/catalog/collections/{code}/sections */
+	public function collectionSectionsAction(string $code)
+	{
+		return $this->respond(fn () => (new CollectionService())->sections($code));
 	}
 
 	/** GET /api/v1/catalog/products?query= — search by name (TZ 4.1) */

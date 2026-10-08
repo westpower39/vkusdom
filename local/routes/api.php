@@ -34,6 +34,9 @@ return function (RoutingConfigurator $routes) {
 		$routes->get('catalog/sections/{id}', [Controller\Catalog::class, 'section'])->where('id', $id);
 		$routes->get('catalog/sections/{id}/products', [Controller\Catalog::class, 'sectionProducts'])->where('id', $id);
 		$routes->get('catalog/sections/{id}/filters', [Controller\Catalog::class, 'sectionFilters'])->where('id', $id);
+		$routes->get('catalog/collections/{code}/products', [Controller\Catalog::class, 'collectionProducts'])->where('code', $code);
+		$routes->get('catalog/collections/{code}/filters', [Controller\Catalog::class, 'collectionFilters'])->where('code', $code);
+		$routes->get('catalog/collections/{code}/sections', [Controller\Catalog::class, 'collectionSections'])->where('code', $code);
 		$routes->get('catalog/products', [Controller\Catalog::class, 'products']);
 		$routes->get('catalog/products/filters', [Controller\Catalog::class, 'productsFilters']);
 		$routes->get('catalog/products/{id}', [Controller\Catalog::class, 'product'])->where('id', $id);
