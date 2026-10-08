@@ -1,0 +1,3093 @@
+openapi: 3.0.3
+info:
+  title: ВкусДом — API мобильного приложения
+  version: 1.0.0
+  description: |
+    Публичное API для мобильного приложения ВкусДом.
+
+    **Формат ответа.** Любой ответ — конверт `{status, data, errors}`:
+    при успехе `status = "success"`, полезная нагрузка в `data`, `errors = []`;
+    при ошибке `status = "error"`, `data = null`, в `errors` — список ошибок, HTTP-код соответствует коду первой ошибки.
+
+    **Общие правила контракта**
+    1. Списки — в `items`; постраничные списки дополнительно содержат `pagination`.
+    2. Ссылка на другую сущность — объект `Ref {id, name}`, не плоское поле `xxxId`.
+    3. Поля в camelCase; везде `name` (не `title`), дочерние элементы — `children`.
+    4. Коды (подборки, сортировки, метки, фильтры) — строки в kebab-case.
+    5. Нет значения → `null` (поле присутствует); пустой список → `[]`.
+    6. ID — integer (исключение — временные объекты, например верификация телефона: UUID-строка). Деньги — number (2 знака), валюта в объекте цены. Даты — ISO 8601 с часовым поясом. Вес — граммы.
+    7. Картинка — абсолютный URL оригинала или `null`.
+    8. Булевы флаги — с префиксом `is`/`has`.
+    9. HTTP-методы: GET — чтение; PUT — установить состояние ресурса по известному адресу (повтор безопасен);
+       DELETE — удалить (повтор не ошибка); POST — создать новое или выполнить действие.
+    10. Тело запроса — JSON (`Content-Type: application/json`), поля в camelCase.
+    11. Параметр пути `{id}` — ID самого ресурса; `{productId}`, `{code}` — если ресурс адресуется через другую сущность.
+    12. Персональные данные зависят от заголовка `Authorization: Bearer <token>`.
+    13. `errors[].message` — текст на русском, можно показывать пользователю.
+
+    **Авторизация (ТЗ 8.5).** Каталог и контент — без токена (с токеном карточки получают isFavorite и cartQuantity).
+    Корзина и расчёт оформления — с гостевым или пользовательским токеном (`POST /auth/guest`).
+    Избранное, заказы, профиль — только после входа (`POST /auth/login`). access-токен короткий (15 мин),
+    refresh-токен — 30 дней: при 401 вызовите `POST /auth/refresh`.
+
+    **Заглушки.** Методы с пометкой «ожидает реализации на сайте» отвечают 503 SERVICE_UNAVAILABLE
+    (запись) или пустыми данными (чтение) — контракт не изменится, когда сайт их реализует.
+servers:
+  - url: "https://vkusdom.westpower.ru/api/v1"
+    description: "Тестовый стенд"
+tags:
+  - name: "system"
+  - name: "content"
+  - name: "catalog"
+  - name: "auth"
+  - name: "cart"
+  - name: "favorites"
+  - name: "checkout"
+  - name: "orders"
+  - name: "profile"
+paths:
+  "/ping":
+    get:
+      tags:
+        - "system"
+      summary: "Проверка доступности API"
+      responses:
+        '200':
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                allOf:
+                  - "$ref": "#/components/schemas/SuccessEnvelope"
+                  - type: "object"
+                    properties:
+                      data:
+                        "$ref": "#/components/schemas/Ping"
+  "/banners":
+    get:
+      tags:
+        - "content"
+      summary: "Большие баннеры (мобильные слайды)"
+      responses:
+        '200':
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                allOf:
+                  - "$ref": "#/components/schemas/SuccessEnvelope"
+                  - type: "object"
+                    properties:
+                      data:
+                        "$ref": "#/components/schemas/BannerList"
+        '503':
+          "$ref": "#/components/responses/Unavailable"
+  "/promotions":
+    get:
+      tags:
+        - "content"
+      summary: "Акции (маленькие баннеры)"
+      responses:
+        '200':
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                allOf:
+                  - "$ref": "#/components/schemas/SuccessEnvelope"
+                  - type: "object"
+                    properties:
+                      data:
+                        "$ref": "#/components/schemas/PromotionList"
+        '503':
+          "$ref": "#/components/responses/Unavailable"
+  "/promotions/{id}":
+    get:
+      tags:
+        - "content"
+      summary: "Детальная акции с товарами"
+      responses:
+        '200':
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                allOf:
+                  - "$ref": "#/components/schemas/SuccessEnvelope"
+                  - type: "object"
+                    properties:
+                      data:
+                        "$ref": "#/components/schemas/PromotionDetail"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+        '503':
+          "$ref": "#/components/responses/Unavailable"
+      parameters:
+        - "$ref": "#/components/parameters/Id"
+      security:
+        - {}
+        - bearerAuth: []
+  "/brands":
+    get:
+      tags:
+        - "content"
+      summary: "Бренды"
+      responses:
+        '200':
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                allOf:
+                  - "$ref": "#/components/schemas/SuccessEnvelope"
+                  - type: "object"
+                    properties:
+                      data:
+                        "$ref": "#/components/schemas/BrandList"
+        '503':
+          "$ref": "#/components/responses/Unavailable"
+  "/pages":
+    get:
+      tags:
+        - "content"
+      summary: "Страницы «Клиентской службы» (webview)"
+      responses:
+        '200':
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                allOf:
+                  - "$ref": "#/components/schemas/SuccessEnvelope"
+                  - type: "object"
+                    properties:
+                      data:
+                        "$ref": "#/components/schemas/PageList"
+  "/catalog/sections":
+    get:
+      tags:
+        - "catalog"
+      summary: "Дерево каталога (2 уровня)"
+      responses:
+        '200':
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                allOf:
+                  - "$ref": "#/components/schemas/SuccessEnvelope"
+                  - type: "object"
+                    properties:
+                      data:
+                        "$ref": "#/components/schemas/SectionTree"
+        '503':
+          "$ref": "#/components/responses/Unavailable"
+  "/catalog/sections/{id}":
+    get:
+      tags:
+        - "catalog"
+      summary: "Детальная раздела"
+      responses:
+        '200':
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                allOf:
+                  - "$ref": "#/components/schemas/SuccessEnvelope"
+                  - type: "object"
+                    properties:
+                      data:
+                        "$ref": "#/components/schemas/SectionDetail"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+        '503':
+          "$ref": "#/components/responses/Unavailable"
+      parameters:
+        - "$ref": "#/components/parameters/Id"
+  "/catalog/sections/{id}/products":
+    get:
+      tags:
+        - "catalog"
+      summary: "Товары раздела (с подразделами)"
+      responses:
+        '200':
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                allOf:
+                  - "$ref": "#/components/schemas/SuccessEnvelope"
+                  - type: "object"
+                    properties:
+                      data:
+                        "$ref": "#/components/schemas/ProductList"
+        '400':
+          "$ref": "#/components/responses/ValidationError"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+        '503':
+          "$ref": "#/components/responses/Unavailable"
+      parameters:
+        - "$ref": "#/components/parameters/Id"
+        - "$ref": "#/components/parameters/Page"
+        - "$ref": "#/components/parameters/Limit"
+        - "$ref": "#/components/parameters/Sort"
+        - "$ref": "#/components/parameters/Filter"
+      security:
+        - {}
+        - bearerAuth: []
+  "/catalog/sections/{id}/filters":
+    get:
+      tags:
+        - "catalog"
+      summary: "Фильтры и сортировки раздела"
+      responses:
+        '200':
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                allOf:
+                  - "$ref": "#/components/schemas/SuccessEnvelope"
+                  - type: "object"
+                    properties:
+                      data:
+                        "$ref": "#/components/schemas/Filters"
+        '400':
+          "$ref": "#/components/responses/ValidationError"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+        '503':
+          "$ref": "#/components/responses/Unavailable"
+      parameters:
+        - "$ref": "#/components/parameters/Id"
+        - "$ref": "#/components/parameters/Filter"
+  "/catalog/collections/{code}/products":
+    get:
+      tags:
+        - "catalog"
+      summary: "Товары подборки"
+      responses:
+        '200':
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                allOf:
+                  - "$ref": "#/components/schemas/SuccessEnvelope"
+                  - type: "object"
+                    properties:
+                      data:
+                        "$ref": "#/components/schemas/CollectionProducts"
+        '400':
+          "$ref": "#/components/responses/ValidationError"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+        '503':
+          "$ref": "#/components/responses/Unavailable"
+      description: "Пока подборке не назначено содержимое в админке, `items` пустой — блок нужно скрыть."
+      parameters:
+        - "$ref": "#/components/parameters/ProductCollectionCode"
+        - "$ref": "#/components/parameters/Page"
+        - "$ref": "#/components/parameters/Limit"
+        - "$ref": "#/components/parameters/Sort"
+        - "$ref": "#/components/parameters/Filter"
+      security:
+        - {}
+        - bearerAuth: []
+  "/catalog/collections/{code}/filters":
+    get:
+      tags:
+        - "catalog"
+      summary: "Фильтры и сортировки подборки"
+      responses:
+        '200':
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                allOf:
+                  - "$ref": "#/components/schemas/SuccessEnvelope"
+                  - type: "object"
+                    properties:
+                      data:
+                        "$ref": "#/components/schemas/Filters"
+        '400':
+          "$ref": "#/components/responses/ValidationError"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+        '503':
+          "$ref": "#/components/responses/Unavailable"
+      parameters:
+        - "$ref": "#/components/parameters/ProductCollectionCode"
+        - "$ref": "#/components/parameters/Filter"
+  "/catalog/collections/{code}/sections":
+    get:
+      tags:
+        - "catalog"
+      summary: "Подборка разделов (плитки)"
+      responses:
+        '200':
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                allOf:
+                  - "$ref": "#/components/schemas/SuccessEnvelope"
+                  - type: "object"
+                    properties:
+                      data:
+                        "$ref": "#/components/schemas/CollectionSections"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+        '503':
+          "$ref": "#/components/responses/Unavailable"
+      parameters:
+        - "$ref": "#/components/parameters/SectionCollectionCode"
+  "/catalog/products":
+    get:
+      tags:
+        - "catalog"
+      summary: "Поиск товаров по названию"
+      responses:
+        '200':
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                allOf:
+                  - "$ref": "#/components/schemas/SuccessEnvelope"
+                  - type: "object"
+                    properties:
+                      data:
+                        "$ref": "#/components/schemas/ProductList"
+        '400':
+          "$ref": "#/components/responses/ValidationError"
+        '503':
+          "$ref": "#/components/responses/Unavailable"
+      parameters:
+        - "$ref": "#/components/parameters/Query"
+        - "$ref": "#/components/parameters/Page"
+        - "$ref": "#/components/parameters/Limit"
+        - "$ref": "#/components/parameters/Sort"
+        - "$ref": "#/components/parameters/Filter"
+      security:
+        - {}
+        - bearerAuth: []
+  "/catalog/products/filters":
+    get:
+      tags:
+        - "catalog"
+      summary: "Фильтры для результатов поиска"
+      responses:
+        '200':
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                allOf:
+                  - "$ref": "#/components/schemas/SuccessEnvelope"
+                  - type: "object"
+                    properties:
+                      data:
+                        "$ref": "#/components/schemas/Filters"
+        '400':
+          "$ref": "#/components/responses/ValidationError"
+        '503':
+          "$ref": "#/components/responses/Unavailable"
+      parameters:
+        - "$ref": "#/components/parameters/Query"
+        - "$ref": "#/components/parameters/Filter"
+  "/catalog/products/{id}":
+    get:
+      tags:
+        - "catalog"
+      summary: "Детальная товара"
+      responses:
+        '200':
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                allOf:
+                  - "$ref": "#/components/schemas/SuccessEnvelope"
+                  - type: "object"
+                    properties:
+                      data:
+                        "$ref": "#/components/schemas/ProductDetail"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+        '503':
+          "$ref": "#/components/responses/Unavailable"
+      parameters:
+        - "$ref": "#/components/parameters/Id"
+      security:
+        - {}
+        - bearerAuth: []
+  "/auth/guest":
+    post:
+      tags:
+        - "auth"
+      summary: "Гостевая сессия (корзина без входа)"
+      responses:
+        '200':
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                allOf:
+                  - "$ref": "#/components/schemas/SuccessEnvelope"
+                  - type: "object"
+                    properties:
+                      data:
+                        "$ref": "#/components/schemas/Tokens"
+  "/auth/verifications":
+    post:
+      tags:
+        - "auth"
+      summary: "Начать подтверждение телефона"
+      responses:
+        '200':
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                allOf:
+                  - "$ref": "#/components/schemas/SuccessEnvelope"
+                  - type: "object"
+                    properties:
+                      data:
+                        "$ref": "#/components/schemas/Verification"
+        '400':
+          "$ref": "#/components/responses/ValidationError"
+        '429':
+          "$ref": "#/components/responses/TooManyRequests"
+        '503':
+          "$ref": "#/components/responses/Unavailable"
+      description: "SMS — стандартный механизм Битрикса. Вход звонком ожидает реализации на сайте (503). В тестовом режиме SMS не отправляется, код фиксированный, звонок подтверждается сразу."
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              "$ref": "#/components/schemas/VerificationRequest"
+  "/auth/verifications/{id}":
+    get:
+      tags:
+        - "auth"
+      summary: "Статус подтверждения (для звонка — опрашивать раз в 2–3 с)"
+      responses:
+        '200':
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                allOf:
+                  - "$ref": "#/components/schemas/SuccessEnvelope"
+                  - type: "object"
+                    properties:
+                      data:
+                        "$ref": "#/components/schemas/Verification"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+      parameters:
+        - "$ref": "#/components/parameters/VerificationId"
+  "/auth/login":
+    post:
+      tags:
+        - "auth"
+      summary: "Вход по подтверждённому телефону"
+      responses:
+        '200':
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                allOf:
+                  - "$ref": "#/components/schemas/SuccessEnvelope"
+                  - type: "object"
+                    properties:
+                      data:
+                        "$ref": "#/components/schemas/LoginResult"
+        '400':
+          "$ref": "#/components/responses/ValidationError"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+        '409':
+          "$ref": "#/components/responses/Conflict"
+        '503':
+          "$ref": "#/components/responses/Unavailable"
+      description: "Если передан гостевой токен, гостевая корзина переносится пользователю."
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              "$ref": "#/components/schemas/LoginRequest"
+      security:
+        - {}
+        - bearerAuth: []
+  "/auth/refresh":
+    post:
+      tags:
+        - "auth"
+      summary: "Обновить токены"
+      responses:
+        '200':
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                allOf:
+                  - "$ref": "#/components/schemas/SuccessEnvelope"
+                  - type: "object"
+                    properties:
+                      data:
+                        "$ref": "#/components/schemas/Tokens"
+        '400':
+          "$ref": "#/components/responses/ValidationError"
+        '401':
+          "$ref": "#/components/responses/Unauthorized"
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              "$ref": "#/components/schemas/RefreshRequest"
+  "/auth/logout":
+    post:
+      tags:
+        - "auth"
+      summary: "Выход (отзыв токенов)"
+      responses:
+        '200':
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                allOf:
+                  - "$ref": "#/components/schemas/SuccessEnvelope"
+                  - type: "object"
+                    properties:
+                      data:
+                        nullable: true
+                        example: null
+      security:
+        - bearerAuth: []
+  "/cart":
+    get:
+      tags:
+        - "cart"
+      summary: "Корзина"
+      responses:
+        '200':
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                allOf:
+                  - "$ref": "#/components/schemas/SuccessEnvelope"
+                  - type: "object"
+                    properties:
+                      data:
+                        "$ref": "#/components/schemas/Cart"
+        '401':
+          "$ref": "#/components/responses/Unauthorized"
+      security:
+        - bearerAuth: []
+    delete:
+      tags:
+        - "cart"
+      summary: "Очистить корзину"
+      responses:
+        '200':
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                allOf:
+                  - "$ref": "#/components/schemas/SuccessEnvelope"
+                  - type: "object"
+                    properties:
+                      data:
+                        "$ref": "#/components/schemas/Cart"
+        '401':
+          "$ref": "#/components/responses/Unauthorized"
+      security:
+        - bearerAuth: []
+  "/cart/items/{productId}":
+    put:
+      tags:
+        - "cart"
+      summary: "Установить количество товара (0 — удалить)"
+      responses:
+        '200':
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                allOf:
+                  - "$ref": "#/components/schemas/SuccessEnvelope"
+                  - type: "object"
+                    properties:
+                      data:
+                        "$ref": "#/components/schemas/Cart"
+        '400':
+          "$ref": "#/components/responses/ValidationError"
+        '401':
+          "$ref": "#/components/responses/Unauthorized"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+      parameters:
+        - "$ref": "#/components/parameters/ProductId"
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              "$ref": "#/components/schemas/CartItemRequest"
+      security:
+        - bearerAuth: []
+    delete:
+      tags:
+        - "cart"
+      summary: "Удалить товар из корзины"
+      responses:
+        '200':
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                allOf:
+                  - "$ref": "#/components/schemas/SuccessEnvelope"
+                  - type: "object"
+                    properties:
+                      data:
+                        "$ref": "#/components/schemas/Cart"
+        '401':
+          "$ref": "#/components/responses/Unauthorized"
+      parameters:
+        - "$ref": "#/components/parameters/ProductId"
+      security:
+        - bearerAuth: []
+  "/cart/promo-codes":
+    post:
+      tags:
+        - "cart"
+      summary: "Применить промокод"
+      responses:
+        '200':
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                allOf:
+                  - "$ref": "#/components/schemas/SuccessEnvelope"
+                  - type: "object"
+                    properties:
+                      data:
+                        "$ref": "#/components/schemas/Cart"
+        '400':
+          "$ref": "#/components/responses/ValidationError"
+        '401':
+          "$ref": "#/components/responses/Unauthorized"
+      description: "Несуществующий код → 400 PROMO_CODE_INVALID. Существующий, но не подходящий по условиям, добавляется со статусом `not-applied`."
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              "$ref": "#/components/schemas/PromoCodeRequest"
+      security:
+        - bearerAuth: []
+  "/cart/promo-codes/{code}":
+    delete:
+      tags:
+        - "cart"
+      summary: "Убрать промокод"
+      responses:
+        '200':
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                allOf:
+                  - "$ref": "#/components/schemas/SuccessEnvelope"
+                  - type: "object"
+                    properties:
+                      data:
+                        "$ref": "#/components/schemas/Cart"
+        '401':
+          "$ref": "#/components/responses/Unauthorized"
+      parameters:
+        - "$ref": "#/components/parameters/PromoCode"
+      security:
+        - bearerAuth: []
+  "/favorites":
+    get:
+      tags:
+        - "favorites"
+      summary: "Избранное"
+      responses:
+        '200':
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                allOf:
+                  - "$ref": "#/components/schemas/SuccessEnvelope"
+                  - type: "object"
+                    properties:
+                      data:
+                        "$ref": "#/components/schemas/ProductList"
+        '400':
+          "$ref": "#/components/responses/ValidationError"
+        '401':
+          "$ref": "#/components/responses/Unauthorized"
+      parameters:
+        - "$ref": "#/components/parameters/Page"
+        - "$ref": "#/components/parameters/Limit"
+      security:
+        - bearerAuth: []
+  "/favorites/{productId}":
+    put:
+      tags:
+        - "favorites"
+      summary: "Добавить в избранное"
+      responses:
+        '200':
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                allOf:
+                  - "$ref": "#/components/schemas/SuccessEnvelope"
+                  - type: "object"
+                    properties:
+                      data:
+                        "$ref": "#/components/schemas/FavoriteState"
+        '401':
+          "$ref": "#/components/responses/Unauthorized"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+      parameters:
+        - "$ref": "#/components/parameters/ProductId"
+      security:
+        - bearerAuth: []
+    delete:
+      tags:
+        - "favorites"
+      summary: "Убрать из избранного"
+      responses:
+        '200':
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                allOf:
+                  - "$ref": "#/components/schemas/SuccessEnvelope"
+                  - type: "object"
+                    properties:
+                      data:
+                        "$ref": "#/components/schemas/FavoriteState"
+        '401':
+          "$ref": "#/components/responses/Unauthorized"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+      parameters:
+        - "$ref": "#/components/parameters/ProductId"
+      security:
+        - bearerAuth: []
+  "/checkout/options":
+    get:
+      tags:
+        - "checkout"
+      summary: "Способы получения, точки самовывоза, варианты замены, профили"
+      responses:
+        '200':
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                allOf:
+                  - "$ref": "#/components/schemas/SuccessEnvelope"
+                  - type: "object"
+                    properties:
+                      data:
+                        "$ref": "#/components/schemas/CheckoutOptions"
+        '503':
+          "$ref": "#/components/responses/Unavailable"
+      security:
+        - {}
+        - bearerAuth: []
+  "/checkout/slots":
+    get:
+      tags:
+        - "checkout"
+      summary: "Слоты доставки/самовывоза"
+      responses:
+        '200':
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                allOf:
+                  - "$ref": "#/components/schemas/SuccessEnvelope"
+                  - type: "object"
+                    properties:
+                      data:
+                        "$ref": "#/components/schemas/SlotDays"
+        '400':
+          "$ref": "#/components/responses/ValidationError"
+        '503':
+          "$ref": "#/components/responses/Unavailable"
+      description: "**Частично заглушка:** лимит заказов на слот и недоступность прошедших слотов ожидают реализации на сайте — сейчас все слоты `isAvailable: true`."
+      parameters:
+        - "$ref": "#/components/parameters/Method"
+  "/checkout/calculation":
+    post:
+      tags:
+        - "checkout"
+      summary: "Расчёт доставки, доступные оплаты, итоги"
+      responses:
+        '200':
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                allOf:
+                  - "$ref": "#/components/schemas/SuccessEnvelope"
+                  - type: "object"
+                    properties:
+                      data:
+                        "$ref": "#/components/schemas/CheckoutCalculation"
+        '400':
+          "$ref": "#/components/responses/ValidationError"
+        '401':
+          "$ref": "#/components/responses/Unauthorized"
+        '503':
+          "$ref": "#/components/responses/Unavailable"
+      description: "Стоимость доставки считает служба доставки сайта (модуль доставки). Детализация (`details`, `components`, `freeDelivery`) заполняется, когда её отдаёт модуль доставки."
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              "$ref": "#/components/schemas/CheckoutRequest"
+      security:
+        - bearerAuth: []
+  "/orders":
+    post:
+      tags:
+        - "orders"
+      summary: "Оформить заказ"
+      responses:
+        '200':
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                allOf:
+                  - "$ref": "#/components/schemas/SuccessEnvelope"
+                  - type: "object"
+                    properties:
+                      data:
+                        "$ref": "#/components/schemas/Order"
+        '400':
+          "$ref": "#/components/responses/ValidationError"
+        '401':
+          "$ref": "#/components/responses/Unauthorized"
+        '503':
+          "$ref": "#/components/responses/Unavailable"
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              "$ref": "#/components/schemas/OrderRequest"
+      security:
+        - bearerAuth: []
+    get:
+      tags:
+        - "orders"
+      summary: "История заказов"
+      responses:
+        '200':
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                allOf:
+                  - "$ref": "#/components/schemas/SuccessEnvelope"
+                  - type: "object"
+                    properties:
+                      data:
+                        "$ref": "#/components/schemas/OrderList"
+        '400':
+          "$ref": "#/components/responses/ValidationError"
+        '401':
+          "$ref": "#/components/responses/Unauthorized"
+      parameters:
+        - "$ref": "#/components/parameters/Page"
+        - "$ref": "#/components/parameters/Limit"
+      security:
+        - bearerAuth: []
+  "/orders/{id}":
+    get:
+      tags:
+        - "orders"
+      summary: "Заказ"
+      responses:
+        '200':
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                allOf:
+                  - "$ref": "#/components/schemas/SuccessEnvelope"
+                  - type: "object"
+                    properties:
+                      data:
+                        "$ref": "#/components/schemas/Order"
+        '401':
+          "$ref": "#/components/responses/Unauthorized"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+      parameters:
+        - "$ref": "#/components/parameters/Id"
+      security:
+        - bearerAuth: []
+  "/orders/{id}/repeat":
+    post:
+      tags:
+        - "orders"
+      summary: "Повторить заказ (товары добавляются в корзину)"
+      responses:
+        '200':
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                allOf:
+                  - "$ref": "#/components/schemas/SuccessEnvelope"
+                  - type: "object"
+                    properties:
+                      data:
+                        "$ref": "#/components/schemas/Cart"
+        '401':
+          "$ref": "#/components/responses/Unauthorized"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+      parameters:
+        - "$ref": "#/components/parameters/Id"
+      security:
+        - bearerAuth: []
+  "/orders/{id}/payment":
+    post:
+      tags:
+        - "orders"
+      summary: "Ссылка на онлайн-оплату (ЮKassa)"
+      responses:
+        '200':
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                allOf:
+                  - "$ref": "#/components/schemas/SuccessEnvelope"
+                  - type: "object"
+                    properties:
+                      data:
+                        "$ref": "#/components/schemas/PaymentLink"
+        '400':
+          "$ref": "#/components/responses/ValidationError"
+        '401':
+          "$ref": "#/components/responses/Unauthorized"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+        '503':
+          "$ref": "#/components/responses/Unavailable"
+      parameters:
+        - "$ref": "#/components/parameters/Id"
+      security:
+        - bearerAuth: []
+  "/profile":
+    get:
+      tags:
+        - "profile"
+      summary: "Профиль"
+      responses:
+        '200':
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                allOf:
+                  - "$ref": "#/components/schemas/SuccessEnvelope"
+                  - type: "object"
+                    properties:
+                      data:
+                        "$ref": "#/components/schemas/Profile"
+        '401':
+          "$ref": "#/components/responses/Unauthorized"
+      description: "`notifications` = null, пока настройки уведомлений не реализованы на сайте."
+      security:
+        - bearerAuth: []
+    put:
+      tags:
+        - "profile"
+      summary: "Изменить имя, фамилию, e-mail"
+      responses:
+        '200':
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                allOf:
+                  - "$ref": "#/components/schemas/SuccessEnvelope"
+                  - type: "object"
+                    properties:
+                      data:
+                        "$ref": "#/components/schemas/Profile"
+        '400':
+          "$ref": "#/components/responses/ValidationError"
+        '401':
+          "$ref": "#/components/responses/Unauthorized"
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              "$ref": "#/components/schemas/ProfileUpdate"
+      security:
+        - bearerAuth: []
+  "/profile/notifications":
+    put:
+      tags:
+        - "profile"
+      summary: "Настройки уведомлений"
+      responses:
+        '200':
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                allOf:
+                  - "$ref": "#/components/schemas/SuccessEnvelope"
+                  - type: "object"
+                    properties:
+                      data:
+                        nullable: true
+                        example: null
+        '401':
+          "$ref": "#/components/responses/Unauthorized"
+        '503':
+          "$ref": "#/components/responses/Unavailable"
+      description: "Переключатели push / e-mail / SMS.\n\n**Заглушка:** функция ожидает реализации на сайте, сейчас всегда отвечает 503 SERVICE_UNAVAILABLE."
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              "$ref": "#/components/schemas/NotificationSettings"
+      security:
+        - bearerAuth: []
+  "/order-profiles":
+    get:
+      tags:
+        - "profile"
+      summary: "Профили заказов (физ. / юр. лицо)"
+      responses:
+        '200':
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                allOf:
+                  - "$ref": "#/components/schemas/SuccessEnvelope"
+                  - type: "object"
+                    properties:
+                      data:
+                        "$ref": "#/components/schemas/OrderProfileList"
+        '401':
+          "$ref": "#/components/responses/Unauthorized"
+      security:
+        - bearerAuth: []
+    post:
+      tags:
+        - "profile"
+      summary: "Создать профиль заказа"
+      responses:
+        '200':
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                allOf:
+                  - "$ref": "#/components/schemas/SuccessEnvelope"
+                  - type: "object"
+                    properties:
+                      data:
+                        "$ref": "#/components/schemas/OrderProfile"
+        '400':
+          "$ref": "#/components/responses/ValidationError"
+        '401':
+          "$ref": "#/components/responses/Unauthorized"
+        '503':
+          "$ref": "#/components/responses/Unavailable"
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              "$ref": "#/components/schemas/OrderProfileCreate"
+      security:
+        - bearerAuth: []
+  "/order-profiles/fields":
+    get:
+      tags:
+        - "profile"
+      summary: "Поля профиля для типа покупателя"
+      responses:
+        '200':
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                allOf:
+                  - "$ref": "#/components/schemas/SuccessEnvelope"
+                  - type: "object"
+                    properties:
+                      data:
+                        "$ref": "#/components/schemas/OrderProfileFields"
+        '400':
+          "$ref": "#/components/responses/ValidationError"
+        '503':
+          "$ref": "#/components/responses/Unavailable"
+      parameters:
+        - "$ref": "#/components/parameters/PersonType"
+  "/order-profiles/{id}":
+    put:
+      tags:
+        - "profile"
+      summary: "Изменить профиль заказа"
+      responses:
+        '200':
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                allOf:
+                  - "$ref": "#/components/schemas/SuccessEnvelope"
+                  - type: "object"
+                    properties:
+                      data:
+                        "$ref": "#/components/schemas/OrderProfile"
+        '400':
+          "$ref": "#/components/responses/ValidationError"
+        '401':
+          "$ref": "#/components/responses/Unauthorized"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+      parameters:
+        - "$ref": "#/components/parameters/Id"
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              "$ref": "#/components/schemas/OrderProfileUpdate"
+      security:
+        - bearerAuth: []
+    delete:
+      tags:
+        - "profile"
+      summary: "Удалить профиль заказа"
+      responses:
+        '200':
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                allOf:
+                  - "$ref": "#/components/schemas/SuccessEnvelope"
+                  - type: "object"
+                    properties:
+                      data:
+                        nullable: true
+                        example: null
+        '401':
+          "$ref": "#/components/responses/Unauthorized"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+      parameters:
+        - "$ref": "#/components/parameters/Id"
+      security:
+        - bearerAuth: []
+  "/ratings/products":
+    get:
+      tags:
+        - "profile"
+      summary: "Купленные товары для оценки"
+      responses:
+        '200':
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                allOf:
+                  - "$ref": "#/components/schemas/SuccessEnvelope"
+                  - type: "object"
+                    properties:
+                      data:
+                        "$ref": "#/components/schemas/RatingList"
+        '400':
+          "$ref": "#/components/responses/ValidationError"
+        '401':
+          "$ref": "#/components/responses/Unauthorized"
+      description: "Список — из оплаченных заказов. `rating` = null, пока хранение оценок не реализовано на сайте."
+      parameters:
+        - "$ref": "#/components/parameters/Page"
+        - "$ref": "#/components/parameters/Limit"
+      security:
+        - bearerAuth: []
+  "/ratings/products/{productId}":
+    put:
+      tags:
+        - "profile"
+      summary: "Оценить товар (1–5)"
+      responses:
+        '200':
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                allOf:
+                  - "$ref": "#/components/schemas/SuccessEnvelope"
+                  - type: "object"
+                    properties:
+                      data:
+                        nullable: true
+                        example: null
+        '401':
+          "$ref": "#/components/responses/Unauthorized"
+        '503':
+          "$ref": "#/components/responses/Unavailable"
+      description: "**Заглушка:** функция ожидает реализации на сайте, сейчас всегда отвечает 503 SERVICE_UNAVAILABLE."
+      parameters:
+        - "$ref": "#/components/parameters/ProductId"
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              "$ref": "#/components/schemas/RatingRequest"
+      security:
+        - bearerAuth: []
+  "/feedback":
+    post:
+      tags:
+        - "profile"
+      summary: "Обратная связь"
+      responses:
+        '200':
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                allOf:
+                  - "$ref": "#/components/schemas/SuccessEnvelope"
+                  - type: "object"
+                    properties:
+                      data:
+                        nullable: true
+                        example: null
+        '503':
+          "$ref": "#/components/responses/Unavailable"
+      description: "**Заглушка:** функция ожидает реализации на сайте, сейчас всегда отвечает 503 SERVICE_UNAVAILABLE."
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              "$ref": "#/components/schemas/FeedbackRequest"
+      security:
+        - {}
+        - bearerAuth: []
+  "/devices/{token}":
+    put:
+      tags:
+        - "profile"
+      summary: "Зарегистрировать FCM-токен устройства"
+      responses:
+        '200':
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                allOf:
+                  - "$ref": "#/components/schemas/SuccessEnvelope"
+                  - type: "object"
+                    properties:
+                      data:
+                        nullable: true
+                        example: null
+        '401':
+          "$ref": "#/components/responses/Unauthorized"
+        '503':
+          "$ref": "#/components/responses/Unavailable"
+      description: "**Заглушка:** функция ожидает реализации на сайте, сейчас всегда отвечает 503 SERVICE_UNAVAILABLE."
+      parameters:
+        - "$ref": "#/components/parameters/DeviceToken"
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              "$ref": "#/components/schemas/DeviceRequest"
+      security:
+        - bearerAuth: []
+    delete:
+      tags:
+        - "profile"
+      summary: "Удалить FCM-токен устройства"
+      responses:
+        '200':
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                allOf:
+                  - "$ref": "#/components/schemas/SuccessEnvelope"
+                  - type: "object"
+                    properties:
+                      data:
+                        nullable: true
+                        example: null
+        '503':
+          "$ref": "#/components/responses/Unavailable"
+      description: "**Заглушка:** функция ожидает реализации на сайте, сейчас всегда отвечает 503 SERVICE_UNAVAILABLE."
+      parameters:
+        - "$ref": "#/components/parameters/DeviceToken"
+      security:
+        - bearerAuth: []
+components:
+  securitySchemes:
+    bearerAuth:
+      type: "http"
+      scheme: "bearer"
+      description: "accessToken из /auth/guest, /auth/login или /auth/refresh"
+  parameters:
+    Id:
+      name: "id"
+      in: "path"
+      required: true
+      schema:
+        type: "integer"
+    ProductId:
+      name: "productId"
+      in: "path"
+      required: true
+      schema:
+        type: "integer"
+    ProductCollectionCode:
+      name: "code"
+      in: "path"
+      required: true
+      schema:
+        type: "string"
+        enum:
+          - "own-production"
+          - "prepared"
+          - "chemicals"
+          - "hits"
+          - "new"
+          - "healthy"
+          - "promo"
+    SectionCollectionCode:
+      name: "code"
+      in: "path"
+      required: true
+      schema:
+        type: "string"
+        enum:
+          - "popular"
+          - "bread"
+          - "semi-finished"
+    VerificationId:
+      name: "id"
+      in: "path"
+      required: true
+      schema:
+        type: "string"
+    PromoCode:
+      name: "code"
+      in: "path"
+      required: true
+      schema:
+        type: "string"
+    DeviceToken:
+      name: "token"
+      in: "path"
+      required: true
+      schema:
+        type: "string"
+    Page:
+      name: "page"
+      in: "query"
+      schema:
+        type: "integer"
+        minimum: 1
+        default: 1
+    Limit:
+      name: "limit"
+      in: "query"
+      schema:
+        type: "integer"
+        minimum: 1
+        maximum: 50
+        default: 20
+    Sort:
+      name: "sort"
+      in: "query"
+      schema:
+        type: "string"
+        enum:
+          - "popular"
+          - "price-asc"
+          - "price-desc"
+        default: "popular"
+    Filter:
+      name: "filter"
+      in: "query"
+      style: "deepObject"
+      explode: true
+      schema:
+        type: "object"
+      description: "filter[price][min]=100&filter[price][max]=500&filter[brend][]=<value>. Коды и значения — из …/filters"
+    Query:
+      name: "query"
+      in: "query"
+      required: true
+      schema:
+        type: "string"
+        minLength: 2
+    Method:
+      name: "method"
+      in: "query"
+      required: true
+      schema:
+        type: "string"
+        enum:
+          - "delivery"
+          - "pickup"
+    PersonType:
+      name: "personType"
+      in: "query"
+      required: true
+      schema:
+        type: "string"
+        enum:
+          - "individual"
+          - "legal"
+  responses:
+    ValidationError:
+      description: "Неверные параметры"
+      content:
+        "application/json":
+          schema:
+            "$ref": "#/components/schemas/ErrorEnvelope"
+          example:
+            status: "error"
+            data: null
+            errors:
+              - message: "Параметр limit должен быть от 1 до 50"
+                code: "VALIDATION_ERROR"
+                customData: null
+    Unauthorized:
+      description: "Нет токена, токен истёк или нужен вход"
+      content:
+        "application/json":
+          schema:
+            "$ref": "#/components/schemas/ErrorEnvelope"
+          example:
+            status: "error"
+            data: null
+            errors:
+              - message: "Токен недействителен или истёк"
+                code: "UNAUTHORIZED"
+                customData: null
+    NotFound:
+      description: "Не найдено"
+      content:
+        "application/json":
+          schema:
+            "$ref": "#/components/schemas/ErrorEnvelope"
+          example:
+            status: "error"
+            data: null
+            errors:
+              - message: "Раздел не найден"
+                code: "NOT_FOUND"
+                customData: null
+    Conflict:
+      description: "Звонок ещё не поступил"
+      content:
+        "application/json":
+          schema:
+            "$ref": "#/components/schemas/ErrorEnvelope"
+          example:
+            status: "error"
+            data: null
+            errors:
+              - message: "Звонок ещё не поступил"
+                code: "VERIFICATION_PENDING"
+                customData: null
+    TooManyRequests:
+      description: "Слишком частый повтор"
+      content:
+        "application/json":
+          schema:
+            "$ref": "#/components/schemas/ErrorEnvelope"
+          example:
+            status: "error"
+            data: null
+            errors:
+              - message: "Повторно запросить код можно через 42 сек."
+                code: "TOO_MANY_REQUESTS"
+                customData: null
+    Unavailable:
+      description: "Не настроено на сайте или ожидает реализации"
+      content:
+        "application/json":
+          schema:
+            "$ref": "#/components/schemas/ErrorEnvelope"
+          example:
+            status: "error"
+            data: null
+            errors:
+              - message: "Функция ожидает реализации на сайте"
+                code: "SERVICE_UNAVAILABLE"
+                customData: null
+  schemas:
+    SuccessEnvelope:
+      type: "object"
+      properties:
+        status:
+          type: "string"
+          enum:
+            - "success"
+        data: {}
+        errors:
+          type: "array"
+          items: {}
+          maxItems: 0
+      required:
+        - "status"
+        - "data"
+        - "errors"
+    ErrorEnvelope:
+      type: "object"
+      properties:
+        status:
+          type: "string"
+          enum:
+            - "error"
+        data:
+          nullable: true
+          example: null
+        errors:
+          type: "array"
+          items:
+            "$ref": "#/components/schemas/Error"
+      required:
+        - "status"
+        - "data"
+        - "errors"
+    Error:
+      type: "object"
+      properties:
+        message:
+          type: "string"
+          description: "Текст на русском, можно показать пользователю"
+        code:
+          type: "string"
+          enum:
+            - "VALIDATION_ERROR"
+            - "UNAUTHORIZED"
+            - "FORBIDDEN"
+            - "NOT_FOUND"
+            - "INTERNAL_ERROR"
+            - "SERVICE_UNAVAILABLE"
+            - "PROMO_CODE_INVALID"
+            - "AUTH_CODE_INVALID"
+            - "VERIFICATION_EXPIRED"
+            - "VERIFICATION_PENDING"
+            - "TOO_MANY_REQUESTS"
+          description: "VALIDATION_ERROR, PROMO_CODE_INVALID, AUTH_CODE_INVALID, VERIFICATION_EXPIRED → 400; UNAUTHORIZED → 401; FORBIDDEN → 403; NOT_FOUND → 404; VERIFICATION_PENDING → 409; TOO_MANY_REQUESTS → 429; INTERNAL_ERROR → 500; SERVICE_UNAVAILABLE → 503 (не настроено или ожидает реализации на сайте)"
+        customData:
+          type: "object"
+          nullable: true
+          description: "Например {field: \"limit\"} или {retryAfter: 42}"
+      required:
+        - "message"
+        - "code"
+    Ping:
+      type: "object"
+      properties:
+        apiVersion:
+          type: "string"
+          example: "v1"
+        serverTime:
+          type: "string"
+          format: "date-time"
+      required:
+        - "apiVersion"
+        - "serverTime"
+    Image:
+      type: "string"
+      format: "uri"
+      nullable: true
+      description: "Абсолютный URL оригинала картинки"
+    Ref:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+        name:
+          type: "string"
+      required:
+        - "id"
+        - "name"
+      description: "Ссылка на другую сущность"
+    SectionItem:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+        name:
+          type: "string"
+        image:
+          "$ref": "#/components/schemas/Image"
+      required:
+        - "id"
+        - "name"
+        - "image"
+    ProductShort:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+        name:
+          type: "string"
+        image:
+          "$ref": "#/components/schemas/Image"
+      required:
+        - "id"
+        - "name"
+        - "image"
+    Pagination:
+      type: "object"
+      properties:
+        page:
+          type: "integer"
+          minimum: 1
+        limit:
+          type: "integer"
+          minimum: 1
+          maximum: 50
+        total:
+          type: "integer"
+        pages:
+          type: "integer"
+      required:
+        - "page"
+        - "limit"
+        - "total"
+        - "pages"
+    Price:
+      type: "object"
+      properties:
+        current:
+          type: "number"
+          example: 189.0
+        old:
+          type: "number"
+          nullable: true
+          description: "Без скидки; null, если скидки нет"
+          example: 229.0
+        discountPercent:
+          type: "integer"
+          nullable: true
+          example: 17
+        currency:
+          type: "string"
+          example: "RUB"
+      required:
+        - "current"
+        - "old"
+        - "discountPercent"
+        - "currency"
+    Label:
+      type: "object"
+      properties:
+        code:
+          type: "string"
+          example: "hit"
+        name:
+          type: "string"
+          example: "Хит"
+      required:
+        - "code"
+        - "name"
+    ProductCard:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+        name:
+          type: "string"
+        image:
+          "$ref": "#/components/schemas/Image"
+        price:
+          "$ref": "#/components/schemas/Price"
+        unit:
+          type: "object"
+          properties:
+            name:
+              type: "string"
+              example: "шт"
+            step:
+              type: "number"
+              description: "Шаг количества"
+              example: 1
+          required:
+            - "name"
+            - "step"
+        weight:
+          type: "integer"
+          nullable: true
+          description: "г"
+        stock:
+          type: "object"
+          properties:
+            isAvailable:
+              type: "boolean"
+            quantity:
+              type: "number"
+              description: "Остаток суммарно по складам"
+          required:
+            - "isAvailable"
+            - "quantity"
+        labels:
+          type: "array"
+          items:
+            "$ref": "#/components/schemas/Label"
+        brand:
+          allOf:
+            - "$ref": "#/components/schemas/Ref"
+          nullable: true
+        isFavorite:
+          type: "boolean"
+          description: "false без токена и у гостя"
+        cartQuantity:
+          type: "number"
+          description: "Сколько уже в корзине; 0 — нет"
+      required:
+        - "id"
+        - "name"
+        - "image"
+        - "price"
+        - "unit"
+        - "weight"
+        - "stock"
+        - "labels"
+        - "brand"
+        - "isFavorite"
+        - "cartQuantity"
+      description: "Карточка товара — одинаковая во всех списках"
+    ProductList:
+      type: "object"
+      properties:
+        items:
+          type: "array"
+          items:
+            "$ref": "#/components/schemas/ProductCard"
+        pagination:
+          "$ref": "#/components/schemas/Pagination"
+      required:
+        - "items"
+        - "pagination"
+    FilterValue:
+      type: "object"
+      properties:
+        value:
+          type: "string"
+          description: "Отправляется в filter[code][]"
+        name:
+          type: "string"
+        count:
+          type: "integer"
+          description: "С учётом выбранных фильтров"
+      required:
+        - "value"
+        - "name"
+        - "count"
+    Filter:
+      type: "object"
+      properties:
+        code:
+          type: "string"
+          example: "brend"
+        name:
+          type: "string"
+        type:
+          type: "string"
+          enum:
+            - "range"
+            - "multiselect"
+        min:
+          type: "number"
+          description: "range"
+        max:
+          type: "number"
+          description: "range"
+        values:
+          type: "array"
+          items:
+            "$ref": "#/components/schemas/FilterValue"
+          description: "multiselect"
+      required:
+        - "code"
+        - "name"
+        - "type"
+    Sort:
+      type: "object"
+      properties:
+        code:
+          type: "string"
+          enum:
+            - "popular"
+            - "price-asc"
+            - "price-desc"
+        name:
+          type: "string"
+      required:
+        - "code"
+        - "name"
+    Filters:
+      type: "object"
+      properties:
+        filters:
+          type: "array"
+          items:
+            "$ref": "#/components/schemas/Filter"
+        sorts:
+          type: "array"
+          items:
+            "$ref": "#/components/schemas/Sort"
+      required:
+        - "filters"
+        - "sorts"
+      description: "Набор фильтров динамический: цена + свойства с галочкой «умный фильтр»"
+    Banner:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+        image:
+          "$ref": "#/components/schemas/Image"
+        promotion:
+          allOf:
+            - "$ref": "#/components/schemas/Ref"
+          nullable: true
+          description: "Акция, которая открывается по нажатию"
+      required:
+        - "id"
+        - "image"
+        - "promotion"
+    BannerList:
+      type: "object"
+      properties:
+        items:
+          type: "array"
+          items:
+            "$ref": "#/components/schemas/Banner"
+      required:
+        - "items"
+    PromotionList:
+      type: "object"
+      properties:
+        items:
+          type: "array"
+          items:
+            "$ref": "#/components/schemas/SectionItem"
+      required:
+        - "items"
+    PromotionDetail:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+        name:
+          type: "string"
+        image:
+          "$ref": "#/components/schemas/Image"
+        description:
+          type: "string"
+          nullable: true
+          description: "HTML"
+        activeFrom:
+          type: "string"
+          format: "date-time"
+          nullable: true
+        activeTo:
+          type: "string"
+          format: "date-time"
+          nullable: true
+        products:
+          type: "array"
+          items:
+            "$ref": "#/components/schemas/ProductCard"
+      required:
+        - "id"
+        - "name"
+        - "image"
+        - "description"
+        - "activeFrom"
+        - "activeTo"
+        - "products"
+    BrandList:
+      type: "object"
+      properties:
+        items:
+          type: "array"
+          items:
+            "$ref": "#/components/schemas/SectionItem"
+      required:
+        - "items"
+    PageList:
+      type: "object"
+      properties:
+        items:
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              code:
+                type: "string"
+              name:
+                type: "string"
+              url:
+                type: "string"
+                format: "uri"
+            required:
+              - "code"
+              - "name"
+              - "url"
+      required:
+        - "items"
+    SectionTree:
+      type: "object"
+      properties:
+        items:
+          type: "array"
+          items:
+            allOf:
+              - "$ref": "#/components/schemas/SectionItem"
+              - type: "object"
+                properties:
+                  children:
+                    type: "array"
+                    items:
+                      "$ref": "#/components/schemas/SectionItem"
+                required:
+                  - "children"
+      required:
+        - "items"
+    SectionDetail:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+        name:
+          type: "string"
+        image:
+          "$ref": "#/components/schemas/Image"
+        breadcrumbs:
+          type: "array"
+          items:
+            "$ref": "#/components/schemas/Ref"
+          description: "От корня до текущего раздела включительно"
+        children:
+          type: "array"
+          items:
+            "$ref": "#/components/schemas/SectionItem"
+        productsCount:
+          type: "integer"
+      required:
+        - "id"
+        - "name"
+        - "image"
+        - "breadcrumbs"
+        - "children"
+        - "productsCount"
+    Collection:
+      type: "object"
+      properties:
+        code:
+          type: "string"
+          example: "own-production"
+        name:
+          type: "string"
+        section:
+          allOf:
+            - "$ref": "#/components/schemas/Ref"
+          nullable: true
+          description: "Раздел, на котором построена подборка (для «Смотреть все»)"
+      required:
+        - "code"
+        - "name"
+        - "section"
+    CollectionProducts:
+      type: "object"
+      properties:
+        collection:
+          "$ref": "#/components/schemas/Collection"
+        items:
+          type: "array"
+          items:
+            "$ref": "#/components/schemas/ProductCard"
+        pagination:
+          "$ref": "#/components/schemas/Pagination"
+      required:
+        - "collection"
+        - "items"
+        - "pagination"
+    CollectionSections:
+      type: "object"
+      properties:
+        collection:
+          "$ref": "#/components/schemas/Collection"
+        items:
+          type: "array"
+          items:
+            "$ref": "#/components/schemas/SectionItem"
+      required:
+        - "collection"
+        - "items"
+    ProductDetail:
+      allOf:
+        - "$ref": "#/components/schemas/ProductCard"
+        - type: "object"
+          properties:
+            images:
+              type: "array"
+              items:
+                "$ref": "#/components/schemas/Image"
+            description:
+              type: "string"
+              nullable: true
+              description: "HTML"
+            article:
+              type: "string"
+              nullable: true
+            breadcrumbs:
+              type: "array"
+              items:
+                "$ref": "#/components/schemas/Ref"
+            nutrition:
+              type: "object"
+              properties:
+                calories:
+                  type: "number"
+                  nullable: true
+                proteins:
+                  type: "number"
+                  nullable: true
+                fats:
+                  type: "number"
+                  nullable: true
+                carbohydrates:
+                  type: "number"
+                  nullable: true
+              required:
+                - "calories"
+                - "proteins"
+                - "fats"
+                - "carbohydrates"
+              description: "На 100 г"
+              nullable: true
+            properties:
+              type: "array"
+              items:
+                type: "object"
+                properties:
+                  code:
+                    type: "string"
+                    example: "composition"
+                  name:
+                    type: "string"
+                  value:
+                    type: "string"
+                required:
+                  - "code"
+                  - "name"
+                  - "value"
+              description: "composition, main-ingredients, allergens, may-contain, storage-conditions, shelf-life, storage-temperature, country, manufacturer"
+          required:
+            - "images"
+            - "description"
+            - "article"
+            - "breadcrumbs"
+            - "nutrition"
+            - "properties"
+    Tokens:
+      type: "object"
+      properties:
+        accessToken:
+          type: "string"
+        accessTokenExpiresAt:
+          type: "string"
+          format: "date-time"
+        refreshToken:
+          type: "string"
+        refreshTokenExpiresAt:
+          type: "string"
+          format: "date-time"
+      required:
+        - "accessToken"
+        - "accessTokenExpiresAt"
+        - "refreshToken"
+        - "refreshTokenExpiresAt"
+    LoginResult:
+      allOf:
+        - "$ref": "#/components/schemas/Tokens"
+        - type: "object"
+          properties:
+            user:
+              type: "object"
+              properties:
+                id:
+                  type: "integer"
+                phone:
+                  type: "string"
+                  nullable: true
+                name:
+                  type: "string"
+                  nullable: true
+              required:
+                - "id"
+                - "phone"
+                - "name"
+          required:
+            - "user"
+    VerificationRequest:
+      type: "object"
+      properties:
+        phone:
+          type: "string"
+          example: "+79001234567"
+        channel:
+          type: "string"
+          enum:
+            - "sms"
+            - "call"
+      required:
+        - "phone"
+        - "channel"
+    Verification:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+        channel:
+          type: "string"
+          enum:
+            - "sms"
+            - "call"
+        status:
+          type: "string"
+          enum:
+            - "pending"
+            - "confirmed"
+            - "expired"
+        expiresAt:
+          type: "string"
+          format: "date-time"
+        resendAfter:
+          type: "integer"
+          description: "сек"
+        codeLength:
+          type: "integer"
+          nullable: true
+        callPhone:
+          type: "string"
+          nullable: true
+          description: "Номер, на который нужно позвонить"
+      required:
+        - "id"
+        - "channel"
+        - "status"
+        - "expiresAt"
+        - "resendAfter"
+        - "codeLength"
+        - "callPhone"
+    LoginRequest:
+      type: "object"
+      properties:
+        verificationId:
+          type: "string"
+        code:
+          type: "string"
+          nullable: true
+          description: "Для sms"
+        personalDataConsent:
+          type: "boolean"
+      required:
+        - "verificationId"
+        - "code"
+        - "personalDataConsent"
+    RefreshRequest:
+      type: "object"
+      properties:
+        refreshToken:
+          type: "string"
+      required:
+        - "refreshToken"
+    Warning:
+      type: "object"
+      properties:
+        code:
+          type: "string"
+          enum:
+            - "price-changed"
+            - "out-of-stock"
+            - "quantity-reduced"
+            - "not-added"
+        message:
+          type: "string"
+      required:
+        - "code"
+        - "message"
+    CartItem:
+      type: "object"
+      properties:
+        product:
+          "$ref": "#/components/schemas/ProductCard"
+        quantity:
+          type: "number"
+        total:
+          "$ref": "#/components/schemas/Price"
+        warnings:
+          type: "array"
+          items:
+            "$ref": "#/components/schemas/Warning"
+      required:
+        - "product"
+        - "quantity"
+        - "total"
+        - "warnings"
+    Cart:
+      type: "object"
+      properties:
+        items:
+          type: "array"
+          items:
+            "$ref": "#/components/schemas/CartItem"
+        promoCodes:
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              code:
+                type: "string"
+              status:
+                type: "string"
+                enum:
+                  - "applied"
+                  - "not-applied"
+              message:
+                type: "string"
+                nullable: true
+            required:
+              - "code"
+              - "status"
+              - "message"
+        summary:
+          type: "object"
+          properties:
+            itemsCount:
+              type: "integer"
+            quantity:
+              type: "number"
+            weight:
+              type: "integer"
+              nullable: true
+              description: "г"
+            total:
+              "$ref": "#/components/schemas/Price"
+          required:
+            - "itemsCount"
+            - "quantity"
+            - "weight"
+            - "total"
+        checkout:
+          type: "object"
+          properties:
+            isAvailable:
+              type: "boolean"
+            reasons:
+              type: "array"
+              items:
+                type: "object"
+                properties:
+                  code:
+                    type: "string"
+                    enum:
+                      - "empty-cart"
+                      - "has-unavailable-items"
+                  message:
+                    type: "string"
+                required:
+                  - "code"
+                  - "message"
+          required:
+            - "isAvailable"
+            - "reasons"
+      required:
+        - "items"
+        - "promoCodes"
+        - "summary"
+        - "checkout"
+    CartItemRequest:
+      type: "object"
+      properties:
+        quantity:
+          type: "number"
+          minimum: 0
+          description: "Итоговое количество, кратно unit.step; 0 — удалить"
+      required:
+        - "quantity"
+    PromoCodeRequest:
+      type: "object"
+      properties:
+        code:
+          type: "string"
+      required:
+        - "code"
+    FavoriteState:
+      type: "object"
+      properties:
+        product:
+          "$ref": "#/components/schemas/Ref"
+        isFavorite:
+          type: "boolean"
+        favoritesCount:
+          type: "integer"
+      required:
+        - "product"
+        - "isFavorite"
+        - "favoritesCount"
+    PickupPoint:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+        name:
+          type: "string"
+        address:
+          type: "string"
+        schedule:
+          type: "string"
+          nullable: true
+        phone:
+          type: "string"
+          nullable: true
+        latitude:
+          type: "number"
+          nullable: true
+        longitude:
+          type: "number"
+          nullable: true
+        image:
+          "$ref": "#/components/schemas/Image"
+      required:
+        - "id"
+        - "name"
+        - "address"
+        - "schedule"
+        - "phone"
+        - "latitude"
+        - "longitude"
+        - "image"
+    OrderProfile:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+        name:
+          type: "string"
+        personType:
+          type: "object"
+          properties:
+            code:
+              type: "string"
+              enum:
+                - "individual"
+                - "legal"
+            name:
+              type: "string"
+          required:
+            - "code"
+            - "name"
+        fields:
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              code:
+                type: "string"
+              name:
+                type: "string"
+              value:
+                type: "string"
+                nullable: true
+            required:
+              - "code"
+              - "name"
+              - "value"
+      required:
+        - "id"
+        - "name"
+        - "personType"
+        - "fields"
+    OrderProfileList:
+      type: "object"
+      properties:
+        items:
+          type: "array"
+          items:
+            "$ref": "#/components/schemas/OrderProfile"
+      required:
+        - "items"
+    OrderProfileFields:
+      type: "object"
+      properties:
+        items:
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              code:
+                type: "string"
+              name:
+                type: "string"
+              type:
+                type: "string"
+                enum:
+                  - "string"
+                  - "number"
+                  - "email"
+                  - "phone"
+              isRequired:
+                type: "boolean"
+            required:
+              - "code"
+              - "name"
+              - "type"
+              - "isRequired"
+      required:
+        - "items"
+    OrderProfileCreate:
+      type: "object"
+      properties:
+        personType:
+          type: "string"
+          enum:
+            - "individual"
+            - "legal"
+        name:
+          type: "string"
+        fields:
+          type: "object"
+          additionalProperties:
+            type: "string"
+          description: "code → value"
+      required:
+        - "personType"
+        - "name"
+        - "fields"
+    OrderProfileUpdate:
+      type: "object"
+      properties:
+        name:
+          type: "string"
+        fields:
+          type: "object"
+          additionalProperties:
+            type: "string"
+      required:
+        - "name"
+        - "fields"
+    CheckoutOptions:
+      type: "object"
+      properties:
+        methods:
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              code:
+                type: "string"
+                example: "delivery"
+              name:
+                type: "string"
+            required:
+              - "code"
+              - "name"
+        pickupPoints:
+          type: "array"
+          items:
+            "$ref": "#/components/schemas/PickupPoint"
+        replacementOptions:
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              code:
+                type: "string"
+              name:
+                type: "string"
+            required:
+              - "code"
+              - "name"
+          description: "Что делать с отсутствующими товарами"
+        orderProfiles:
+          type: "array"
+          items:
+            "$ref": "#/components/schemas/OrderProfile"
+      required:
+        - "methods"
+        - "pickupPoints"
+        - "replacementOptions"
+        - "orderProfiles"
+    SlotDays:
+      type: "object"
+      properties:
+        items:
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              date:
+                type: "string"
+                format: "date"
+              slots:
+                type: "array"
+                items:
+                  type: "object"
+                  properties:
+                    id:
+                      type: "integer"
+                    name:
+                      type: "string"
+                      example: "10:00–12:00"
+                    from:
+                      type: "string"
+                      nullable: true
+                    to:
+                      type: "string"
+                      nullable: true
+                    isAvailable:
+                      type: "boolean"
+                  required:
+                    - "id"
+                    - "name"
+                    - "from"
+                    - "to"
+                    - "isAvailable"
+            required:
+              - "date"
+              - "slots"
+      required:
+        - "items"
+    Address:
+      type: "object"
+      properties:
+        text:
+          type: "string"
+        latitude:
+          type: "number"
+          nullable: true
+        longitude:
+          type: "number"
+          nullable: true
+        apartment:
+          type: "string"
+          nullable: true
+        entrance:
+          type: "string"
+          nullable: true
+        floor:
+          type: "integer"
+          nullable: true
+        hasElevator:
+          type: "boolean"
+          nullable: true
+        hasFreightElevator:
+          type: "boolean"
+          nullable: true
+      required:
+        - "text"
+    CheckoutRequest:
+      type: "object"
+      properties:
+        method:
+          type: "string"
+          enum:
+            - "delivery"
+            - "pickup"
+        orderProfileId:
+          type: "integer"
+          nullable: true
+          description: "null — физ. лицо"
+        address:
+          allOf:
+            - "$ref": "#/components/schemas/Address"
+          nullable: true
+          description: "Для delivery"
+        pickupPointId:
+          type: "integer"
+          nullable: true
+          description: "Для pickup"
+      required:
+        - "method"
+    DeliveryQuote:
+      type: "object"
+      properties:
+        isAvailable:
+          type: "boolean"
+        reason:
+          type: "object"
+          properties:
+            code:
+              type: "string"
+            message:
+              type: "string"
+          required:
+            - "code"
+            - "message"
+          nullable: true
+        price:
+          "$ref": "#/components/schemas/Price"
+        isFree:
+          type: "boolean"
+        freeDelivery:
+          type: "object"
+          properties:
+            threshold:
+              type: "number"
+            amountLeft:
+              type: "number"
+          required:
+            - "threshold"
+            - "amountLeft"
+          description: "«До бесплатной доставки осталось …»"
+          nullable: true
+        components:
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              code:
+                type: "string"
+                example: "base"
+              name:
+                type: "string"
+              amount:
+                type: "number"
+              isCoveredByFree:
+                type: "boolean"
+            required:
+              - "code"
+              - "name"
+              - "amount"
+              - "isCoveredByFree"
+        details:
+          type: "object"
+          properties:
+            distance:
+              type: "integer"
+              nullable: true
+              description: "м"
+            weight:
+              type: "integer"
+              description: "г"
+            transport:
+              type: "object"
+              properties:
+                code:
+                  type: "string"
+                name:
+                  type: "string"
+              required:
+                - "code"
+                - "name"
+              nullable: true
+            weather:
+              type: "object"
+              properties:
+                code:
+                  type: "string"
+                name:
+                  type: "string"
+                coefficient:
+                  type: "number"
+              required:
+                - "code"
+                - "name"
+                - "coefficient"
+              nullable: true
+          required:
+            - "distance"
+            - "weight"
+            - "transport"
+            - "weather"
+      required:
+        - "isAvailable"
+        - "reason"
+        - "price"
+        - "isFree"
+        - "freeDelivery"
+        - "components"
+        - "details"
+    PaymentMethod:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+        name:
+          type: "string"
+        isOnline:
+          type: "boolean"
+      required:
+        - "id"
+        - "name"
+        - "isOnline"
+    CheckoutSummary:
+      type: "object"
+      properties:
+        itemsTotal:
+          "$ref": "#/components/schemas/Price"
+        delivery:
+          "$ref": "#/components/schemas/Price"
+        total:
+          "$ref": "#/components/schemas/Price"
+      required:
+        - "itemsTotal"
+        - "delivery"
+        - "total"
+    CheckoutCalculation:
+      type: "object"
+      properties:
+        delivery:
+          "$ref": "#/components/schemas/DeliveryQuote"
+        paymentMethods:
+          type: "array"
+          items:
+            "$ref": "#/components/schemas/PaymentMethod"
+        summary:
+          "$ref": "#/components/schemas/CheckoutSummary"
+      required:
+        - "delivery"
+        - "paymentMethods"
+        - "summary"
+    OrderRequest:
+      allOf:
+        - "$ref": "#/components/schemas/CheckoutRequest"
+        - type: "object"
+          properties:
+            paymentMethodId:
+              type: "integer"
+            slot:
+              type: "object"
+              properties:
+                date:
+                  type: "string"
+                  format: "date"
+                id:
+                  type: "integer"
+              required:
+                - "date"
+                - "id"
+              nullable: true
+            replacement:
+              type: "string"
+              nullable: true
+              description: "code из replacementOptions"
+            comment:
+              type: "string"
+              nullable: true
+          required:
+            - "paymentMethodId"
+    Order:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+        number:
+          type: "string"
+        createdAt:
+          type: "string"
+          format: "date-time"
+        status:
+          type: "object"
+          properties:
+            code:
+              type: "string"
+              enum:
+                - "accepted"
+                - "paid"
+                - "assembling"
+                - "ready"
+                - "delivering"
+                - "completed"
+                - "cancelled"
+            name:
+              type: "string"
+          required:
+            - "code"
+            - "name"
+        method:
+          type: "object"
+          properties:
+            code:
+              type: "string"
+            name:
+              type: "string"
+          required:
+            - "code"
+            - "name"
+          nullable: true
+        pickupPoint:
+          type: "object"
+          properties:
+            id:
+              type: "integer"
+            name:
+              type: "string"
+            address:
+              type: "string"
+          required:
+            - "id"
+            - "name"
+            - "address"
+          nullable: true
+        address:
+          type: "object"
+          properties:
+            text:
+              type: "string"
+          required:
+            - "text"
+          nullable: true
+        deliveryTime:
+          type: "string"
+          nullable: true
+          description: "Слот, как записан в заказе (формат согласуется с сайтом)"
+        items:
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              product:
+                "$ref": "#/components/schemas/ProductShort"
+              quantity:
+                type: "number"
+              total:
+                "$ref": "#/components/schemas/Price"
+            required:
+              - "product"
+              - "quantity"
+              - "total"
+        summary:
+          type: "object"
+          properties:
+            itemsCount:
+              type: "integer"
+            quantity:
+              type: "number"
+            weight:
+              type: "integer"
+              nullable: true
+            itemsTotal:
+              "$ref": "#/components/schemas/Price"
+            delivery:
+              "$ref": "#/components/schemas/Price"
+            total:
+              "$ref": "#/components/schemas/Price"
+          required:
+            - "itemsCount"
+            - "quantity"
+            - "weight"
+            - "itemsTotal"
+            - "delivery"
+            - "total"
+        payment:
+          type: "object"
+          properties:
+            method:
+              allOf:
+                - "$ref": "#/components/schemas/Ref"
+              nullable: true
+            isPaid:
+              type: "boolean"
+            isOnline:
+              type: "boolean"
+          required:
+            - "method"
+            - "isPaid"
+            - "isOnline"
+        canPay:
+          type: "boolean"
+      required:
+        - "id"
+        - "number"
+        - "createdAt"
+        - "status"
+        - "method"
+        - "pickupPoint"
+        - "address"
+        - "deliveryTime"
+        - "items"
+        - "summary"
+        - "payment"
+        - "canPay"
+    OrderList:
+      type: "object"
+      properties:
+        items:
+          type: "array"
+          items:
+            "$ref": "#/components/schemas/Order"
+        pagination:
+          "$ref": "#/components/schemas/Pagination"
+      required:
+        - "items"
+        - "pagination"
+    PaymentLink:
+      type: "object"
+      properties:
+        url:
+          type: "string"
+          format: "uri"
+      required:
+        - "url"
+    Profile:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+        phone:
+          type: "string"
+          nullable: true
+        name:
+          type: "string"
+          nullable: true
+        lastName:
+          type: "string"
+          nullable: true
+        email:
+          type: "string"
+          nullable: true
+        notifications:
+          allOf:
+            - "$ref": "#/components/schemas/NotificationSettings"
+          nullable: true
+      required:
+        - "id"
+        - "phone"
+        - "name"
+        - "lastName"
+        - "email"
+        - "notifications"
+    ProfileUpdate:
+      type: "object"
+      properties:
+        name:
+          type: "string"
+        lastName:
+          type: "string"
+        email:
+          type: "string"
+      required: []
+    NotificationSettings:
+      type: "object"
+      properties:
+        isPushEnabled:
+          type: "boolean"
+        isEmailEnabled:
+          type: "boolean"
+        isSmsEnabled:
+          type: "boolean"
+      required:
+        - "isPushEnabled"
+        - "isEmailEnabled"
+        - "isSmsEnabled"
+    RatingList:
+      type: "object"
+      properties:
+        items:
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              product:
+                "$ref": "#/components/schemas/ProductShort"
+              rating:
+                type: "integer"
+                nullable: true
+                minimum: 1
+                maximum: 5
+            required:
+              - "product"
+              - "rating"
+        pagination:
+          "$ref": "#/components/schemas/Pagination"
+      required:
+        - "items"
+        - "pagination"
+    RatingRequest:
+      type: "object"
+      properties:
+        rating:
+          type: "integer"
+          minimum: 1
+          maximum: 5
+      required:
+        - "rating"
+    FeedbackRequest:
+      type: "object"
+      properties:
+        name:
+          type: "string"
+        phone:
+          type: "string"
+        email:
+          type: "string"
+        message:
+          type: "string"
+      required:
+        - "message"
+    DeviceRequest:
+      type: "object"
+      properties:
+        platform:
+          type: "string"
+          enum:
+            - "ios"
+            - "android"
+      required:
+        - "platform"
