@@ -7,12 +7,19 @@ use Westpower\Mobile\Service\Content\BannerService;
 use Westpower\Mobile\Service\Content\BrandService;
 use Westpower\Mobile\Service\Content\PromotionService;
 use Westpower\Mobile\Service\Formatter;
+use Westpower\Mobile\Service\HomeService;
 
 /**
- * Content: banners, promotions, brands, "client service" pages.
+ * Content: home screen layout, banners, promotions, brands, "client service" pages.
  */
 final class Content extends Base
 {
+	/** GET /api/v1/home */
+	public function homeAction()
+	{
+		return $this->respond(fn () => (new HomeService())->layout());
+	}
+
 	/** GET /api/v1/banners */
 	public function bannersAction()
 	{

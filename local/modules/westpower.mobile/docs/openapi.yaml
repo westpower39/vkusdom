@@ -63,6 +63,24 @@ paths:
                     properties:
                       data:
                         "$ref": "#/components/schemas/Ping"
+  "/home":
+    get:
+      tags:
+        - "content"
+      summary: "Главный экран: блоки по порядку (server-driven)"
+      description: "Приложение рисует блоки по `type`: banners → GET /banners, promotions → GET /promotions, brands → GET /brands, products → GET /catalog/collections/{collection.code}/products, sections → GET /catalog/collections/{collection.code}/sections. Порядок, названия и видимость настраиваются в админке; блоки без содержимого не возвращаются."
+      responses:
+        '200':
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                allOf:
+                  - "$ref": "#/components/schemas/SuccessEnvelope"
+                  - type: "object"
+                    properties:
+                      data:
+                        "$ref": "#/components/schemas/HomeLayout"
   "/banners":
     get:
       tags:
@@ -1891,6 +1909,32 @@ components:
         - "filters"
         - "sorts"
       description: "Набор фильтров динамический: цена + свойства с галочкой «умный фильтр»"
+    HomeLayout:
+      type: "object"
+      properties:
+        items:
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              type:
+                type: "string"
+                enum:
+                  - "banners"
+                  - "promotions"
+                  - "brands"
+                  - "products"
+                  - "sections"
+              collection:
+                allOf:
+                  - "$ref": "#/components/schemas/Collection"
+                nullable: true
+                description: "Для products и sections; иначе null"
+            required:
+              - "type"
+              - "collection"
+      required:
+        - "items"
     Banner:
       type: "object"
       properties:

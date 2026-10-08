@@ -19,6 +19,8 @@ $request = HttpApplication::getInstance()->getContext()->getRequest();
 
 $sectionsHint = 'символьные коды разделов каталога через запятую';
 $collectionOptions = [
+	'Главный экран приложения (GET /home)',
+	['home_blocks', 'Блоки по порядку, по одному в строке: banners, promotions, brands, collection:<код подборки> (own-production, prepared, chemicals, hits, new, healthy, promo, popular, bread, semi-finished). Пустые блоки не показываются', '', ['textarea', 12, 40]],
 	'Подборки товаров по разделам',
 	['collection_own_production_sections', 'Наше производство — ' . $sectionsHint, '', ['text', 60]],
 	['collection_own_production_name', 'Наше производство — название', '', ['text', 60]],

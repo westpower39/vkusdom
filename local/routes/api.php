@@ -23,6 +23,7 @@ return function (RoutingConfigurator $routes) {
 		$routes->get('ping', [Controller\System::class, 'ping']);
 
 		// Content
+		$routes->get('home', [Controller\Content::class, 'home']);
 		$routes->get('banners', [Controller\Content::class, 'banners']);
 		$routes->get('promotions', [Controller\Content::class, 'promotions']);
 		$routes->get('promotions/{id}', [Controller\Content::class, 'promotion'])->where('id', $id);

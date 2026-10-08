@@ -52,6 +52,27 @@ final class CollectionService
 		return ['collection' => $this->meta($code), 'items' => $items];
 	}
 
+	/**
+	 * Whether the collection has anything to show (used to hide empty home blocks).
+	 */
+	public function hasContent(string $code): bool
+	{
+		[$type] = $this->config($code);
+		if ($type === CollectionCode::TYPE_SECTIONS)
+		{
+			return !empty($this->sections($code)['items']);
+		}
+
+		$scope = $this->scope($code);
+		if ($scope->isEmpty)
+		{
+			return false;
+		}
+		$repository = new ProductRepository();
+
+		return $repository->count($repository->baseFilter() + $scope->filter) > 0;
+	}
+
 	public function meta(string $code): array
 	{
 		[, $source, $prefix] = $this->config($code);

@@ -13,6 +13,10 @@ $westpower_mobile_default_option = [
 	'catalog_excluded_sections' => '',
 	'filter_max_products' => '5000',
 
+	// Home screen layout (GET /home): one block per line, in display order.
+	// Types: banners, promotions, brands, collection:<code>
+	'home_blocks' => "banners\npromotions\ncollection:own-production\ncollection:popular\ncollection:hits\ncollection:prepared\ncollection:new\ncollection:healthy\ncollection:bread\ncollection:semi-finished\nbrands\ncollection:chemicals",
+
 	// Collections: comma-separated section codes of the catalog iblock
 	'collection_own_production_sections' => '',
 	'collection_own_production_name' => 'Наше производство',
