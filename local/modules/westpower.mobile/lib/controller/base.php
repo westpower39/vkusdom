@@ -7,6 +7,8 @@ use Bitrix\Main\Engine\Controller;
 use Bitrix\Main\Error;
 use Bitrix\Main\HttpResponse;
 use Bitrix\Main\Response;
+use Westpower\Mobile\Auth\AuthContext;
+use Westpower\Mobile\Auth\TokenService;
 use Westpower\Mobile\Dictionary\ErrorCode;
 use Westpower\Mobile\Exception\ApiException;
 
@@ -15,6 +17,7 @@ use Westpower\Mobile\Exception\ApiException;
  *
  * Response envelope is the standard AjaxJson: {"status": "success|error", "data": ..., "errors": [...]}.
  * The HTTP status is derived from the first error code. HTTP methods are restricted by routes.
+ * Identity comes from "Authorization: Bearer <accessToken>" (no Bitrix session, no CSRF token).
  */
 abstract class Base extends Controller
 {
@@ -65,6 +68,42 @@ abstract class Base extends Controller
 		$this->addError(new Error($message, $code, $customData));
 
 		return null;
+	}
+
+	/**
+	 * Current identity; anonymous when no token is sent.
+	 */
+	protected function context(): AuthContext
+	{
+		return TokenService::current();
+	}
+
+	/**
+	 * Guest or user session is required (cart, checkout).
+	 */
+	protected function sessionContext(): AuthContext
+	{
+		$context = $this->context();
+		if (!$context->hasSession())
+		{
+			throw ApiException::unauthorized('Нужен токен: получите гостевой через POST /auth/guest');
+		}
+
+		return $context;
+	}
+
+	/**
+	 * Logged-in user is required (favorites, orders, profile).
+	 */
+	protected function userContext(): AuthContext
+	{
+		$context = $this->context();
+		if (!$context->isUser())
+		{
+			throw ApiException::unauthorized('Войдите, чтобы продолжить');
+		}
+
+		return $context;
 	}
 
 	/**

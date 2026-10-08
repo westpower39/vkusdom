@@ -22,6 +22,14 @@ return function (RoutingConfigurator $routes) {
 
 		$routes->get('ping', [Controller\System::class, 'ping']);
 
+		// Auth
+		$routes->post('auth/guest', [Controller\Auth::class, 'guest']);
+		$routes->post('auth/verifications', [Controller\Auth::class, 'createVerification']);
+		$routes->get('auth/verifications/{id}', [Controller\Auth::class, 'verification'])->where('id', '[A-Za-z0-9_.\-]+');
+		$routes->post('auth/login', [Controller\Auth::class, 'login']);
+		$routes->post('auth/refresh', [Controller\Auth::class, 'refresh']);
+		$routes->post('auth/logout', [Controller\Auth::class, 'logout']);
+
 		// Must stay last: JSON 404 for unknown API paths instead of the site 404 page.
 		$routes->get('{path}', [Controller\System::class, 'notFound'])->where('path', '.*');
 	});

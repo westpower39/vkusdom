@@ -1,5 +1,7 @@
 <?php
 
+use Bitrix\Main\Application;
+use Bitrix\Main\Loader;
 use Bitrix\Main\Localization\Loc;
 use Bitrix\Main\ModuleManager;
 
@@ -31,11 +33,34 @@ class westpower_mobile extends CModule
 	public function DoInstall()
 	{
 		ModuleManager::registerModule($this->MODULE_ID);
+		$this->InstallDB();
 	}
 
 	public function DoUninstall()
 	{
+		// App sessions table is kept on uninstall: dropping it would log out every app user.
 		ModuleManager::unRegisterModule($this->MODULE_ID);
 	}
 
+	/**
+	 * The only own table of the module: app sessions with access/refresh token hashes (TZ 8.5).
+	 */
+	public function InstallDB()
+	{
+		Loader::includeModule($this->MODULE_ID);
+
+		$connection = Application::getConnection();
+		$entity = \Westpower\Mobile\Model\SessionTable::getEntity();
+		$table = \Westpower\Mobile\Model\SessionTable::getTableName();
+
+		if (!$connection->isTableExists($table))
+		{
+			$entity->createDbTable();
+			$connection->createIndex($table, 'ix_wpm_session_access', ['ACCESS_HASH']);
+			$connection->createIndex($table, 'ix_wpm_session_refresh', ['REFRESH_HASH']);
+			$connection->createIndex($table, 'ix_wpm_session_user', ['USER_ID']);
+		}
+
+		return true;
+	}
 }
