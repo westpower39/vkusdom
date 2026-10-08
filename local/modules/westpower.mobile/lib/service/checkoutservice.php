@@ -29,6 +29,9 @@ use Westpower\Mobile\Exception\ApiException;
  */
 final class CheckoutService
 {
+	// Pay system type (IS_CASH) "acquiring operation": paid online in the app
+	private const PAY_SYSTEM_TYPE_ACQUIRING = 'A';
+
 	public function __construct()
 	{
 		Loader::includeModule('sale');
@@ -497,25 +500,12 @@ final class CheckoutService
 	}
 
 	/**
-	 * Online = paid by card through a payment handler: not cash, not the internal account, not an invoice.
-	 * Recognized by pay system fields, not by ID or a fixed list of handlers.
+	 * Online = the pay system type is "acquiring operation" (standard pay system field IS_CASH = A).
 	 */
 	public static function isOnlinePaySystem(int $paySystemId): bool
 	{
-		$row = PaySystemActionTable::getList(['filter' => ['=ID' => $paySystemId], 'select' => ['ACTION_FILE', 'IS_CASH']])->fetch();
-		if (!$row || $row['IS_CASH'] === 'Y')
-		{
-			return false;
-		}
+		$row = PaySystemActionTable::getList(['filter' => ['=ID' => $paySystemId], 'select' => ['IS_CASH']])->fetch();
 
-		foreach (EntityCode::OFFLINE_PAY_HANDLER_PREFIXES as $prefix)
-		{
-			if (strpos((string)$row['ACTION_FILE'], $prefix) === 0)
-			{
-				return false;
-			}
-		}
-
-		return true;
+		return $row && $row['IS_CASH'] === self::PAY_SYSTEM_TYPE_ACQUIRING;
 	}
 }
