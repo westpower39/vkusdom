@@ -49,6 +49,14 @@ return function (RoutingConfigurator $routes) {
 		$routes->post('auth/refresh', [Controller\Auth::class, 'refresh']);
 		$routes->post('auth/logout', [Controller\Auth::class, 'logout']);
 
+		// Cart
+		$routes->get('cart', [Controller\Cart::class, 'cart']);
+		$routes->delete('cart', [Controller\Cart::class, 'clear']);
+		$routes->put('cart/items/{productId}', [Controller\Cart::class, 'setItem'])->where('productId', $id);
+		$routes->delete('cart/items/{productId}', [Controller\Cart::class, 'deleteItem'])->where('productId', $id);
+		$routes->post('cart/promo-codes', [Controller\Cart::class, 'addPromoCode']);
+		$routes->delete('cart/promo-codes/{code}', [Controller\Cart::class, 'deletePromoCode'])->where('code', '[^/]+');
+
 		// Must stay last: JSON 404 for unknown API paths instead of the site 404 page.
 		$routes->get('{path}', [Controller\System::class, 'notFound'])->where('path', '.*');
 	});
