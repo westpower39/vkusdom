@@ -30,10 +30,6 @@ info:
     Избранное, заказы, профиль — только после входа (`POST /auth/login`). access-токен короткий (15 мин),
     refresh-токен — 30 дней: при 401 вызовите `POST /auth/refresh`.
 
-    **Токен у метода** указан в названии: «токен обязателен» или «токен необязателен»; без пометки — токен не нужен.
-    Значок замка в Swagger UI показывает, можно ли вызвать метод с введённым в «Authorize» токеном: закрытый — можно,
-    открытый — нужен токен, а он не введён. Поэтому у методов с необязательным токеном замок закрыт и без «Authorize».
-
     **Списки товаров.** Товары без розничной цены в списки, поиск и фильтры не попадают (настройка модуля);
     недоступные товары всегда идут в конце списка при любой сортировке.
 
@@ -130,7 +126,7 @@ paths:
     get:
       tags:
         - "content"
-      summary: "Детальная акции с товарами — токен необязателен"
+      summary: "Детальная акции с товарами"
       responses:
         '200':
           description: "OK"
@@ -234,7 +230,7 @@ paths:
     get:
       tags:
         - "catalog"
-      summary: "Товары раздела (с подразделами) — токен необязателен"
+      summary: "Товары раздела (с подразделами)"
       responses:
         '200':
           description: "OK"
@@ -292,7 +288,7 @@ paths:
     get:
       tags:
         - "catalog"
-      summary: "Товары подборки — токен необязателен"
+      summary: "Товары подборки"
       responses:
         '200':
           description: "OK"
@@ -374,7 +370,7 @@ paths:
     get:
       tags:
         - "catalog"
-      summary: "Поиск товаров по названию — токен необязателен"
+      summary: "Поиск товаров по названию"
       responses:
         '200':
           description: "OK"
@@ -428,7 +424,7 @@ paths:
     get:
       tags:
         - "catalog"
-      summary: "Детальная товара — токен необязателен"
+      summary: "Детальная товара"
       responses:
         '200':
           description: "OK"
@@ -522,7 +518,7 @@ paths:
     post:
       tags:
         - "auth"
-      summary: "Вход по подтверждённому телефону — токен необязателен"
+      summary: "Вход по подтверждённому телефону"
       responses:
         '200':
           description: "OK"
@@ -584,7 +580,7 @@ paths:
     post:
       tags:
         - "auth"
-      summary: "Выход (отзыв токенов) — токен обязателен"
+      summary: "Выход (отзыв токенов)"
       responses:
         '200':
           description: "OK"
@@ -604,7 +600,7 @@ paths:
     get:
       tags:
         - "cart"
-      summary: "Корзина — токен обязателен"
+      summary: "Корзина"
       responses:
         '200':
           description: "OK"
@@ -624,7 +620,7 @@ paths:
     delete:
       tags:
         - "cart"
-      summary: "Очистить корзину — токен обязателен"
+      summary: "Очистить корзину"
       responses:
         '200':
           description: "OK"
@@ -645,7 +641,7 @@ paths:
     put:
       tags:
         - "cart"
-      summary: "Установить количество товара (0 — удалить) — токен обязателен"
+      summary: "Установить количество товара (0 — удалить)"
       responses:
         '200':
           description: "OK"
@@ -677,7 +673,7 @@ paths:
     delete:
       tags:
         - "cart"
-      summary: "Удалить товар из корзины — токен обязателен"
+      summary: "Удалить товар из корзины"
       responses:
         '200':
           description: "OK"
@@ -700,7 +696,7 @@ paths:
     post:
       tags:
         - "cart"
-      summary: "Применить промокод — токен обязателен"
+      summary: "Применить промокод"
       responses:
         '200':
           description: "OK"
@@ -730,7 +726,7 @@ paths:
     delete:
       tags:
         - "cart"
-      summary: "Убрать промокод — токен обязателен"
+      summary: "Убрать промокод"
       responses:
         '200':
           description: "OK"
@@ -753,7 +749,7 @@ paths:
     get:
       tags:
         - "favorites"
-      summary: "Избранное — токен обязателен"
+      summary: "Избранное"
       responses:
         '200':
           description: "OK"
@@ -779,7 +775,7 @@ paths:
     put:
       tags:
         - "favorites"
-      summary: "Добавить в избранное — токен обязателен"
+      summary: "Добавить в избранное"
       responses:
         '200':
           description: "OK"
@@ -803,7 +799,7 @@ paths:
     delete:
       tags:
         - "favorites"
-      summary: "Убрать из избранного — токен обязателен"
+      summary: "Убрать из избранного"
       responses:
         '200':
           description: "OK"
@@ -828,7 +824,7 @@ paths:
     get:
       tags:
         - "checkout"
-      summary: "Способы получения, точки самовывоза, варианты замены, профили — токен необязателен"
+      summary: "Способы получения, точки самовывоза, варианты замены, профили"
       responses:
         '200':
           description: "OK"
@@ -874,7 +870,7 @@ paths:
     post:
       tags:
         - "checkout"
-      summary: "Расчёт доставки, доступные оплаты, итоги — токен обязателен"
+      summary: "Расчёт доставки, доступные оплаты, итоги"
       responses:
         '200':
           description: "OK"
@@ -906,7 +902,7 @@ paths:
     post:
       tags:
         - "orders"
-      summary: "Оформить заказ — токен обязателен"
+      summary: "Оформить заказ"
       responses:
         '200':
           description: "OK"
@@ -936,7 +932,7 @@ paths:
     get:
       tags:
         - "orders"
-      summary: "История заказов — токен обязателен"
+      summary: "История заказов"
       responses:
         '200':
           description: "OK"
@@ -962,7 +958,7 @@ paths:
     get:
       tags:
         - "orders"
-      summary: "Заказ — токен обязателен"
+      summary: "Заказ"
       responses:
         '200':
           description: "OK"
@@ -987,7 +983,7 @@ paths:
     post:
       tags:
         - "orders"
-      summary: "Повторить заказ (товары добавляются в корзину) — токен обязателен"
+      summary: "Повторить заказ (товары добавляются в корзину)"
       responses:
         '200':
           description: "OK"
@@ -1012,7 +1008,7 @@ paths:
     post:
       tags:
         - "orders"
-      summary: "Ссылка на онлайн-оплату (ЮKassa) — токен обязателен"
+      summary: "Ссылка на онлайн-оплату (ЮKassa)"
       responses:
         '200':
           description: "OK"
@@ -1041,7 +1037,7 @@ paths:
     get:
       tags:
         - "profile"
-      summary: "Профиль — токен обязателен"
+      summary: "Профиль"
       responses:
         '200':
           description: "OK"
@@ -1062,7 +1058,7 @@ paths:
     put:
       tags:
         - "profile"
-      summary: "Изменить имя, фамилию, e-mail — токен обязателен"
+      summary: "Изменить имя, фамилию, e-mail"
       responses:
         '200':
           description: "OK"
@@ -1091,7 +1087,7 @@ paths:
     put:
       tags:
         - "profile"
-      summary: "Настройки уведомлений — токен обязателен"
+      summary: "Настройки уведомлений"
       responses:
         '200':
           description: "OK"
@@ -1122,7 +1118,7 @@ paths:
     get:
       tags:
         - "profile"
-      summary: "Профили заказов (физ. / юр. лицо) — токен обязателен"
+      summary: "Профили заказов (физ. / юр. лицо)"
       responses:
         '200':
           description: "OK"
@@ -1142,7 +1138,7 @@ paths:
     post:
       tags:
         - "profile"
-      summary: "Создать профиль заказа — токен обязателен"
+      summary: "Создать профиль заказа"
       responses:
         '200':
           description: "OK"
@@ -1196,7 +1192,7 @@ paths:
     put:
       tags:
         - "profile"
-      summary: "Изменить профиль заказа — токен обязателен"
+      summary: "Изменить профиль заказа"
       responses:
         '200':
           description: "OK"
@@ -1228,7 +1224,7 @@ paths:
     delete:
       tags:
         - "profile"
-      summary: "Удалить профиль заказа — токен обязателен"
+      summary: "Удалить профиль заказа"
       responses:
         '200':
           description: "OK"
@@ -1254,7 +1250,7 @@ paths:
     get:
       tags:
         - "profile"
-      summary: "Купленные товары для оценки — токен обязателен"
+      summary: "Купленные товары для оценки"
       responses:
         '200':
           description: "OK"
@@ -1281,7 +1277,7 @@ paths:
     put:
       tags:
         - "profile"
-      summary: "Оценить товар (1–5) — токен обязателен"
+      summary: "Оценить товар (1–5)"
       responses:
         '200':
           description: "OK"
@@ -1314,7 +1310,7 @@ paths:
     post:
       tags:
         - "profile"
-      summary: "Обратная связь — токен необязателен"
+      summary: "Обратная связь"
       responses:
         '200':
           description: "OK"
@@ -1344,7 +1340,7 @@ paths:
     put:
       tags:
         - "profile"
-      summary: "Зарегистрировать FCM-токен устройства — токен обязателен"
+      summary: "Зарегистрировать FCM-токен устройства"
       responses:
         '200':
           description: "OK"
@@ -1376,7 +1372,7 @@ paths:
     delete:
       tags:
         - "profile"
-      summary: "Удалить FCM-токен устройства — токен обязателен"
+      summary: "Удалить FCM-токен устройства"
       responses:
         '200':
           description: "OK"
