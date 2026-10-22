@@ -7506,8 +7506,13 @@ body.popup-open {
   margin-bottom: 16px;
 }
 .page-actions__tiles-row {
-  padding-bottom: 56px;
+  padding-bottom: 16px;
 }
+
+.page-actions__tiles-row:last-child {
+  padding-bottom: 32px;
+}
+
 @media (max-width: 767px) {
   .page-actions__tiles-row {
     padding-bottom: 40px;
@@ -7972,3 +7977,28 @@ option {
 	cursor: pointer;
 }
 
+/* Режим обычной сетки, когда слайдов <= 4 на десктопе */
+.page-actions__tiles-row.is-grid .swiper-wrapper {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.page-actions__tiles-row.is-grid .swiper-slide {
+  width: auto !important;
+  margin-right: 0 !important;
+}
+
+.page-actions__tiles-row.is-grid .page-actions__tiles-pagination {
+  display: none;
+}
+
+/* На мобилке всегда слайдер, даже если is-grid */
+@media (max-width: 767px) {
+  .page-actions__tiles-row.is-grid .swiper-wrapper {
+    display: flex;
+  }
+  .page-actions__tiles-row.is-grid .page-actions__tiles-pagination {
+    display: block;
+  }
+}

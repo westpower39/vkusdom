@@ -19,6 +19,7 @@ var MethodObtaining = {
 		}
 		Type = JObj.attr("data-method-obtaining");
 		
+		/*
 		if($("#MethodObtaining").length){
 			this.ShowPopup();
 		} else {
@@ -27,6 +28,11 @@ var MethodObtaining = {
 			this.Send(Data);
 
 		}
+		*/
+		$("#MethodObtaining").remove();
+		Data.push({name: "action",value: "get"});
+		Data.push({name: "type",value: Type});
+		this.Send(Data);
 		
 		return false;
 	},
@@ -61,12 +67,13 @@ var MethodObtaining = {
 		
 		if(this.LastAction == "get"){
 			$("body").append(Result);
+			lightTabs('.tabs');
 			
 			$("#MethodObtaining .btn-popup-close").click($.proxy(this.EventClickHidePopupBtn,this))
 			
-			
-			
 			this.ShowPopup();
+			
+			
 		}
 	},
 	SendError: function(){

@@ -13,6 +13,8 @@ $GLOBALS["SITE_SETTINGS"] = array(
 	"IS_CATALOG" => false,
 	"IS_PRODUCT" => false,
 	"IS_ORDER"  => false,
+	"IS_PERSONAL"  => false,
+	"IS_H1" => true
 );
 
 
@@ -24,8 +26,20 @@ if($_SERVER["SCRIPT_NAME"] == "/index.php"){
 	$GLOBALS["SITE_SETTINGS"]["IS_CATALOG"] = true;
 } elseif(preg_match("/^\/product\//i",$_SERVER["REQUEST_URI"])){
 	$GLOBALS["SITE_SETTINGS"]["IS_PRODUCT"] = true;
+} elseif(preg_match("/^\/personal\//i",$_SERVER["REQUEST_URI"])){
+	$GLOBALS["SITE_SETTINGS"]["IS_PERSONAL"] = true;
 }  elseif(preg_match("/^\/order\//i",$_SERVER["REQUEST_URI"])){
 	$GLOBALS["SITE_SETTINGS"]["IS_ORDER"] = true;
+	
+	if(
+		isset($_GET["ORDER_ID"])
+		||
+		preg_match("/^\/order\/payment-success\//i",$_SERVER["REQUEST_URI"])
+		||
+		preg_match("/^\/order\/payment-error\//i",$_SERVER["REQUEST_URI"])
+	){
+		$GLOBALS["SITE_SETTINGS"]["IS_H1"] = false;
+	}
 }
 
 ?>
@@ -55,6 +69,7 @@ if($_SERVER["SCRIPT_NAME"] == "/index.php"){
 		$AssetInstance->addJs(SITE_TEMPLATE_PATH."/libs/js/slimselect.js");
 		$AssetInstance->addJs(SITE_TEMPLATE_PATH."/libs/js/jquery.cookie.js");
 		
+		$AssetInstance->addJs(SITE_TEMPLATE_PATH."/js/select.js");
 		$AssetInstance->addJs(SITE_TEMPLATE_PATH."/js/main.js");
 		$AssetInstance->addJs(SITE_TEMPLATE_PATH."/js/basket.js");
 		$AssetInstance->addJs(SITE_TEMPLATE_PATH."/js/favorit.js");
@@ -282,7 +297,49 @@ if($_SERVER["SCRIPT_NAME"] == "/index.php"){
 		</div>
 		<main class="main">
         	<div class="container">
-        	<?if($GLOBALS["SITE_SETTINGS"]["IS_ORDER"]):?>
+        	<?if($GLOBALS["SITE_SETTINGS"]["IS_PERSONAL"]):?>
+        		<?$APPLICATION->IncludeComponent("bitrix:breadcrumb", "", array(
+						"START_FROM" => "0",
+						"PATH" => "",
+						"SITE_ID" => "-"
+					),
+					false,
+					Array('HIDE_ICONS' => 'Y')
+				);?>
+				<div class="lk-page">
+					<div class="lk-page__inner">
+						<div class="lk-page__menu">
+							<?$APPLICATION->IncludeComponent(
+								"bitrix:menu",
+								"v4",
+								Array(
+									"ALLOW_MULTI_SELECT" => "N",
+									"CHILD_MENU_TYPE" => "",
+									"DELAY" => "N",
+									"MAX_LEVEL" => "1",
+									"MENU_CACHE_GET_VARS" => array(""),
+									"MENU_CACHE_TIME" => "3600",
+									"MENU_CACHE_TYPE" => "A",
+									"MENU_CACHE_USE_GROUPS" => "N",
+									"ROOT_MENU_TYPE" => "personal",
+									"USE_EXT" => "Y"
+								)
+							);?>
+						</div>
+						<div class="lk-page__content">
+							<div class="title-flex">
+			                  	<div class="section-title">
+									<svg width="24" height="24">
+										<use xlink:href="<?=SITE_TEMPLATE_PATH?>/img/sprite.svg#arrow-big-left-icon">
+										</use>
+									</svg><?$APPLICATION->ShowTitle()?>
+								</div>
+								<?$APPLICATION->ShowViewContent('TITLE_AFTER');?>
+			                </div>
+						
+							
+					
+        	<?elseif($GLOBALS["SITE_SETTINGS"]["IS_ORDER"]):?>
         		 <?$APPLICATION->IncludeComponent("bitrix:breadcrumb", "", array(
 						"START_FROM" => "0",
 						"PATH" => "",
@@ -292,10 +349,12 @@ if($_SERVER["SCRIPT_NAME"] == "/index.php"){
 					Array('HIDE_ICONS' => 'Y')
 				);?>
 				<div class="order-page">
+					<?if($GLOBALS["SITE_SETTINGS"]["IS_H1"]):?>
 					<div class="section-title">
 						<svg width="24" height="24"><use xlink:href="<?=SITE_TEMPLATE_PATH?>/img/sprite.svg#arrow-big-left-icon"></use></svg>
 						<?$APPLICATION->ShowTitle()?>
 					</div>
+					<?endif;?>
         	<?elseif($GLOBALS["SITE_SETTINGS"]["IS_CATALOG"]):?>
         	<div class="catalog">
             	<div class="catalog__inner">

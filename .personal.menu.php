@@ -1,71 +1,53 @@
 <?
 $aMenuLinks = Array(
 	Array(
-		"Мой кабинет",
-		"personal/",
-		Array(),
-		Array(),
-		""
-	),
-
-
-	Array(
-		"Текущие заказы",
-		"personal/orders/",
-		Array(),
-		Array(),
-		""
-	),
-
-	Array(
-		"Личный счет",
-		"personal/account/",
-		Array(), 
-		Array(),
-		"CBXFeatures::IsFeatureEnabled('SaleAccounts')"
-	),
-
-	Array(
-		"Личные данные",
-		"personal/private/",
+		"Мой профиль", 
+		"/personal/private/", 
 		Array(), 
 		Array(), 
 		"" 
 	),
 	Array(
-		"История заказов",
-		"personal/orders/?filter_history=Y",
-		Array(),
-		Array(),
-		""
+		"Заказы", 
+		"/personal/orders/", 
+		Array(), 
+		Array(), 
+		"" 
 	),
 	Array(
-		"Профили заказов",
-		"personal/profiles/",
-		Array(),
-		Array(),
-		""
+		"Мои бонусы", 
+		"/personal/bonuses/", 
+		Array(), 
+		Array(), 
+		"" 
 	),
 	Array(
-		"Корзина",
-		"personal/cart/",
-		Array(),
-		Array(),
-		""
+		"Избранное", 
+		"/personal/favorit/", 
+		Array(), 
+		Array(), 
+		"" 
 	),
 	Array(
-		"Подписки",
-		"personal/subscribe/",
-		Array(),
-		Array(),
-		""
+		"Вы уже покупали", 
+		"/personal/already-purchase/", 
+		Array(), 
+		Array(), 
+		"" 
 	),
 	Array(
-		"Контакты",
-		"about/contacts/",
-		Array(),
-		Array(),
-		""
+		"Оценка товара", 
+		"/personal/product-rating/", 
+		Array(), 
+		Array(), 
+		"" 
 	),
+	Array(
+		"Профили заказов", 
+		"/personal/profiles/", 
+		Array(), 
+		Array(), 
+		"" 
+	)
 );
 ?>

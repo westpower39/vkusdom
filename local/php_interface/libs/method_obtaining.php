@@ -90,9 +90,9 @@ class MethodObtaining {
 				
 			} else {
 				self::$UserData = array(
-					"TYPE_ID" => intval( isset($_COOKIE["METHOD_OBTAINING_TYPE"]) ? $_COOKIE["METHOD_OBTAINING_TYPE"] : 0 ),
+					"TYPE_ID" => intval( isset($_COOKIE["METHOD_OBTAINING_TYPE_ID"]) ? $_COOKIE["METHOD_OBTAINING_TYPE_ID"] : 0 ),
 					"TYPE" => array(),
-					"STORE_ID" => intval( isset($_COOKIE["METHOD_OBTAINING_TYPE"]) ? $_COOKIE["METHOD_OBTAINING_TYPE"] : 0 ),
+					"STORE_ID" => intval( isset($_COOKIE["METHOD_OBTAINING_STORE_ID"]) ? $_COOKIE["METHOD_OBTAINING_STORE_ID"] : 0 ),
 					"STORE" => array(),
 					"ADDRESS" => htmlspecialchars( isset($_COOKIE["METHOD_OBTAINING_ADDRESS"]) ? $_COOKIE["METHOD_OBTAINING_ADDRESS"] : 0 ),
 					"LAT" => floatval( isset($_COOKIE["METHOD_OBTAINING_LAT"]) ? $_COOKIE["METHOD_OBTAINING_LAT"] : 0 ),
@@ -143,44 +143,50 @@ class MethodObtaining {
 		return $Result;
 	}
 	
+	public static function GetTypes(){
+		self::InitTypes();
+		return self::$Types;
+	}
+	
 	private static function InitTypes(){
 		
-		$Hb5 = \PhpInterface\Libs\Help::GetHighloadBlock(5);
+		if(empty(self::$Types)){
+			$Hb5 = \PhpInterface\Libs\Help::GetHighloadBlock(5);
 			
-		$Query = $Hb5::getList(array(
-			"select" => array("*")
-		));
-	
-		while($Answer = $Query->Fetch()){
-			
-			$Answer["COMPARISON"] = array(
-				"PERSON_TYPE_TO_DELIVERY" => array(),
-			);
-			
-			foreach($Answer["UF_PERSON_TYPE_IDS"] as $key => $value){
+			$Query = $Hb5::getList(array(
+				"select" => array("*")
+			));
+		
+			while($Answer = $Query->Fetch()){
 				
-				if(!empty($value) && !empty($Answer["UF_DELIVERY_IDS"][$key])){
+				$Answer["COMPARISON"] = array(
+					"PERSON_TYPE_TO_DELIVERY" => array(),
+				);
+				
+				foreach($Answer["UF_PERSON_TYPE_IDS"] as $key => $value){
 					
-					if(!isset($Answer["COMPARISON"]["PERSON_TYPE_TO_DELIVERY"][$value])){
-						$Answer["COMPARISON"]["PERSON_TYPE_TO_DELIVERY"][$value] = array();
+					if(!empty($value) && !empty($Answer["UF_DELIVERY_IDS"][$key])){
+						
+						if(!isset($Answer["COMPARISON"]["PERSON_TYPE_TO_DELIVERY"][$value])){
+							$Answer["COMPARISON"]["PERSON_TYPE_TO_DELIVERY"][$value] = array();
+						}
+						$Answer["COMPARISON"]["PERSON_TYPE_TO_DELIVERY"][$value] = $Answer["UF_DELIVERY_IDS"][$key];
 					}
-					$Answer["COMPARISON"]["PERSON_TYPE_TO_DELIVERY"][$value] = $Answer["UF_DELIVERY_IDS"][$key];
+					
 				}
 				
+				$Answer["DELIVERY_TIMES"] = self::GetDeliveryTimes($Answer["ID"]);
+				
+				
+				$Answer["DELIVERY_DATES"] = self::GetDeliveryDates($Answer["UF_DAYS_COUNT"]);
+				
+				self::$Types[] = $Answer;
 			}
 			
-			$Answer["DELIVERY_TIMES"] = self::GetDeliveryTimes($Answer["ID"]);
-			
-			
-			$Answer["DELIVERY_DATES"] = self::GetDeliveryDates($Answer["UF_DAYS_COUNT"]);
-			
-			self::$Types[] = $Answer;
+			if(self::$DefaultTypeId == 0 && !empty(self::$Types) ){
+				self::$DefaultTypeId = self::$Types[0]["ID"];
+			}
 		}
-		
-		if(self::$DefaultTypeId == 0 && !empty(self::$Types) ){
-			self::$DefaultTypeId = self::$Types[0]["ID"];
-		}
-		
 	}
 	
 	private static function GetDeliveryDates($DaysCount = 0){

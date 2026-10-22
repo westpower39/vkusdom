@@ -337,9 +337,9 @@ document.addEventListener('DOMContentLoaded', () => {
       input.disabled = false;
     });
   });
-  
+
   const lkOrderButtons = document.querySelectorAll(
-  '.lk-orders__item-arrow',
+    '.lk-orders__item-arrow',
   );
   lkOrderButtons.forEach((button) => {
     const parentBlock = button.closest('.lk-orders__item');
@@ -448,105 +448,88 @@ document.addEventListener('DOMContentLoaded', () => {
     },
   });
 
-  const swiperSectionProductsSlider01 = new Swiper(
-    '.section-production-slider01',
-    {
-      slidesPerView: 'auto',
-      spaceBetween: 16,
-      navigation: {
-        nextEl: '.section-production-slider-next01',
-        prevEl: '.section-production-slider-prev01',
-      },
-      loop: true,
-      pagination: {
-        el: '.section-production-slider-pagination01',
-        clickable: true,
-      },
-      breakpoints: {
-        320: {
-          spaceBetween: 8,
+  // Инициализация всех слайдеров производства (01–06) через цикл
+  [1, 2, 3, 4, 5, 6].forEach((num) => {
+    const numStr = String(num).padStart(2, '0');
+    const selector = `.section-production-slider${numStr}`;
+    if (document.querySelector(selector)) {
+      new Swiper(selector, {
+        slidesPerView: 'auto',
+        spaceBetween: 16,
+        navigation: {
+          nextEl: `.section-production-slider-next${numStr}`,
+          prevEl: `.section-production-slider-prev${numStr}`,
         },
-        768: {
-          spaceBetween: 16,
+        loop: true,
+        pagination: {
+          el: `.section-production-slider-pagination${numStr}`,
+          clickable: true,
         },
-      },
-    },
-  );
+        breakpoints: {
+          320: {
+            spaceBetween: 8,
+          },
+          768: {
+            spaceBetween: 16,
+          },
+        },
+      });
+    }
+  });
 
-  const swiperSectionProductsSlider02 = new Swiper(
-    '.section-production-slider02',
-    {
-      slidesPerView: 'auto',
-      spaceBetween: 16,
-      navigation: {
-        nextEl: '.section-production-slider-next02',
-        prevEl: '.section-production-slider-prev02',
-      },
-      loop: true,
-      pagination: {
-        el: '.section-production-slider-pagination02',
-        clickable: true,
-      },
-      breakpoints: {
-        320: {
-          spaceBetween: 8,
-        },
-        768: {
-          spaceBetween: 16,
-        },
-      },
-    },
-  );
+  // Слайдеры акций .page-actions__tiles-row
+  // Логика:
+  //   ПК (≥ 768px) — обычная сетка 4×2, без Swiper и пагинации.
+  //   Мобилка (< 768px) — каждый ряд превращается в отдельный Swiper со своей пагинацией.
+  const TILES_MOBILE_BREAKPOINT = 768;
 
-  const swiperSectionProductsSlider03 = new Swiper(
-    '.section-production-slider03',
-    {
-      slidesPerView: 'auto',
-      spaceBetween: 16,
-      navigation: {
-        nextEl: '.section-production-slider-next03',
-        prevEl: '.section-production-slider-prev03',
-      },
-      loop: true,
-      pagination: {
-        el: '.section-production-slider-pagination03',
-        clickable: true,
-      },
-      breakpoints: {
-        320: {
-          spaceBetween: 8,
-        },
-        768: {
-          spaceBetween: 16,
-        },
-      },
-    },
-  );
+  const initTilesSliders = () => {
+    const isMobile = window.innerWidth < TILES_MOBILE_BREAKPOINT;
 
-  const swiperSectionProductsSlider04 = new Swiper(
-    '.section-production-slider04',
-    {
-      slidesPerView: 'auto',
-      spaceBetween: 16,
-      navigation: {
-        nextEl: '.section-production-slider-next04',
-        prevEl: '.section-production-slider-prev04',
-      },
-      loop: true,
-      pagination: {
-        el: '.section-production-slider-pagination04',
-        clickable: true,
-      },
-      breakpoints: {
-        320: {
+    document.querySelectorAll('.page-actions__tiles-row').forEach((slider) => {
+      const pagination = slider.querySelector('.page-actions__tiles-pagination');
+
+      // Уничтожаем предыдущий Swiper, если он был
+      if (slider.swiper) {
+        slider.swiper.destroy(true, true);
+      }
+
+      if (isMobile) {
+        // Мобилка — Swiper
+        slider.classList.remove('is-grid');
+        if (pagination) pagination.classList.remove('hide');
+
+        new Swiper(slider, {
+          slidesPerView: 1.2,
           spaceBetween: 8,
-        },
-        768: {
-          spaceBetween: 16,
-        },
-      },
-    },
-  );
+          pagination: {
+            el: pagination,
+            clickable: true,
+          },
+          breakpoints: {
+            480: {
+              slidesPerView: 2.2,
+              spaceBetween: 8,
+            },
+          },
+        });
+      } else {
+        // ПК — сетка, Swiper не нужен
+        slider.classList.add('is-grid');
+        if (pagination) pagination.classList.add('hide');
+      }
+    });
+  };
+
+  initTilesSliders();
+
+  // Пересчёт при ресайзе (с дебаунсом)
+  let tilesResizeTimer = null;
+  window.addEventListener('resize', () => {
+    clearTimeout(tilesResizeTimer);
+    tilesResizeTimer = setTimeout(initTilesSliders, 200);
+  });
+
   const swiperSectionBrandsSlider = new Swiper('.section-main-brands-slider', {
     slidesPerView: 5.2,
     spaceBetween: 10,

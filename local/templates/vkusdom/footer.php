@@ -1,6 +1,11 @@
 <?if(!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED !== true)die();?>
 	<?if(!$GLOBALS["SITE_SETTINGS"]["IS_AUTH"]):?>
-		<?if($GLOBALS["SITE_SETTINGS"]["IS_ORDER"]):?>
+		
+		<?if($GLOBALS["SITE_SETTINGS"]["IS_PERSONAL"]):?>
+				</div>
+			</div>
+		</div>
+		<?elseif($GLOBALS["SITE_SETTINGS"]["IS_ORDER"]):?>
 		</div>
 		<?elseif($GLOBALS["SITE_SETTINGS"]["IS_CATALOG"]):?>
 					</div>
