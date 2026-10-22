@@ -2819,6 +2819,7 @@ components:
           type: "string"
         isOnline:
           type: "boolean"
+          description: "Онлайн-оплата в приложении: у платёжной системы «Тип оплаты» = «Эквайринговая операция»"
       required:
         - "id"
         - "name"

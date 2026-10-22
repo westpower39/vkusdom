@@ -93,8 +93,7 @@ final class ProductDetailService
 			'carbohydrates' => $this->number($values[PropertyCode::CARBOHYDRATES] ?? null),
 		];
 
-		// 1C sends zeros when nutrition is not filled: all-zero values mean "no data".
-		return count(array_filter($nutrition, static fn ($value) => $value !== null && $value > 0)) > 0 ? $nutrition : null;
+		return count(array_filter($nutrition, static fn ($value) => $value !== null)) > 0 ? $nutrition : null;
 	}
 
 	private function properties(array $values): array
