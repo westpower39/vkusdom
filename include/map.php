@@ -2,7 +2,7 @@
 	"bitrix:map.yandex.view",
 	"",
 	Array(
-		"API_KEY" => "",
+		"API_KEY" => "62296741-e452-4ca8-a86c-83a8e9e5c179",
 		"CONTROLS" => array("ZOOM","MINIMAP","TYPECONTROL","SCALELINE"),
 		"INIT_MAP_TYPE" => "MAP",
 		"MAP_DATA" => "a:4:{s:10:\"yandex_lat\";d:43.305133327681396;s:10:\"yandex_lon\";d:45.67870148399194;s:12:\"yandex_scale\";i:15;s:10:\"PLACEMARKS\";a:1:{i:0;a:3:{s:3:\"LON\";d:45.68299301841578;s:3:\"LAT\";d:43.30737419911255;s:4:\"TEXT\";s:10:\"Текст\";}}}",

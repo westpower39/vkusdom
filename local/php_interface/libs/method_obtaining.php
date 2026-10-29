@@ -71,7 +71,7 @@ class MethodObtaining {
 			if($USER->IsAuthorized()){
 			
 				$Query = \Bitrix\Main\UserTable::getList(array(
-					"select" => array("ID","UF_METHOD_OBTAINING_TYPE","UF_METHOD_OBTAINING_STORE_ID","UF_METHOD_OBTAINING_ADDRESS","UF_METHOD_OBTAINING_LAT","UF_METHOD_OBTAINING_LON"),
+					"select" => array("ID","UF_METHOD_OBTAINING_TYPE","UF_METHOD_OBTAINING_STORE_ID","UF_METHOD_OBTAINING_ADDRESS","UF_METHOD_OBTAINING_LAT","UF_METHOD_OBTAINING_LON","UF_METHOD_OBTAINING_DELIVERY_ZONE_ID"),
 					"filter" => array(
 						"ID" => $USER->GetID()
 					)
@@ -85,18 +85,20 @@ class MethodObtaining {
 						"ADDRESS" => $Answer["UF_METHOD_OBTAINING_ADDRESS"],
 						"LAT" => $Answer["UF_METHOD_OBTAINING_LAT"],
 						"LON" => $Answer["UF_METHOD_OBTAINING_LON"],
+						"ZONE_ID" => $Answer["UF_METHOD_OBTAINING_DELIVERY_ZONE_ID"],
 					);
 				}
 				
 			} else {
 				self::$UserData = array(
-					"TYPE_ID" => intval( isset($_COOKIE["METHOD_OBTAINING_TYPE_ID"]) ? $_COOKIE["METHOD_OBTAINING_TYPE_ID"] : 0 ),
+					"TYPE_ID" => intval( isset($_COOKIE["UF_METHOD_OBTAINING_TYPE_ID"]) ? $_COOKIE["UF_METHOD_OBTAINING_TYPE_ID"] : 0 ),
 					"TYPE" => array(),
-					"STORE_ID" => intval( isset($_COOKIE["METHOD_OBTAINING_STORE_ID"]) ? $_COOKIE["METHOD_OBTAINING_STORE_ID"] : 0 ),
+					"STORE_ID" => intval( isset($_COOKIE["UF_METHOD_OBTAINING_STORE_ID"]) ? $_COOKIE["UF_METHOD_OBTAINING_STORE_ID"] : 0 ),
 					"STORE" => array(),
-					"ADDRESS" => htmlspecialchars( isset($_COOKIE["METHOD_OBTAINING_ADDRESS"]) ? $_COOKIE["METHOD_OBTAINING_ADDRESS"] : 0 ),
-					"LAT" => floatval( isset($_COOKIE["METHOD_OBTAINING_LAT"]) ? $_COOKIE["METHOD_OBTAINING_LAT"] : 0 ),
-					"LON" => floatval( isset($_COOKIE["METHOD_OBTAINING_LON"]) ? $_COOKIE["METHOD_OBTAINING_LON"] : 0 ),
+					"ZONE_ID" => htmlspecialchars( isset($_COOKIE["UF_METHOD_OBTAINING_DELIVERY_ZONE_ID"]) ? $_COOKIE["UF_METHOD_OBTAINING_DELIVERY_ZONE_ID"] : 0 ),
+					"ADDRESS" => htmlspecialchars( isset($_COOKIE["UF_METHOD_OBTAINING_ADDRESS"]) ? $_COOKIE["UF_METHOD_OBTAINING_ADDRESS"] : 0 ),
+					"LAT" => floatval( isset($_COOKIE["UF_METHOD_OBTAINING_LAT"]) ? $_COOKIE["UF_METHOD_OBTAINING_LAT"] : 0 ),
+					"LON" => floatval( isset($_COOKIE["UF_METHOD_OBTAINING_LON"]) ? $_COOKIE["UF_METHOD_OBTAINING_LON"] : 0 ),
 				);	
 			}
 			

@@ -12,7 +12,19 @@ $Action = htmlspecialchars(isset($_POST["action"]) ? $_POST["action"] : "");
 
 $DeliveryZones = array();
 
-
+$Hb9 = PhpInterface\Libs\Help::GetHighloadBlock(9);
+$Query = $Hb9::getList(array("select" => array("*")));
+while($Answer = $Query->Fetch()){
+	
+	if(!empty($Answer["UF_FILE_GEOJSON"])){
+		$DeliveryZones[] = array(
+			"ID" => $Answer["ID"],
+			"FILE" => CFile::GetPath($Answer["UF_FILE_GEOJSON"])
+		);
+	}
+	
+	
+}
 
 
 
@@ -28,6 +40,12 @@ if($Action == "save"){
 	
 	$NTypeId = intval( isset( $_POST["METHOD_OBTAINING_TYPE_ID"]) ? $_POST["METHOD_OBTAINING_TYPE_ID"] : "");
 	$NStoreId = intval( isset($_POST["METHOD_OBTAINING_STORE_ID"]) ? $_POST["METHOD_OBTAINING_STORE_ID"] : "");
+	
+	$NZoneId = intval( isset($_POST["METHOD_OBTAINING_DELIVERY_ZONE_ID"]) ? $_POST["METHOD_OBTAINING_DELIVERY_ZONE_ID"] : "");
+	$NAddress = htmlspecialchars( isset($_POST["METHOD_OBTAINING_ADDRESS"]) ? $_POST["METHOD_OBTAINING_ADDRESS"] : "");
+	$NLat = htmlspecialchars( isset($_POST["METHOD_OBTAINING_LAT"]) ? $_POST["METHOD_OBTAINING_LAT"] : "");
+	$NLon = htmlspecialchars( isset($_POST["METHOD_OBTAINING_LON"]) ? $_POST["METHOD_OBTAINING_LON"] : "");
+
 	
 	if($NTypeId > 0){
 		foreach($Types as $key => $value){
@@ -46,6 +64,20 @@ if($Action == "save"){
 			}
 		}
 	}
+	
+	if($NLat > 0 && $NLon > 0 && $NZoneId > 0 && !empty($NAddress) ){
+		$UFields["UF_METHOD_OBTAINING_LAT"] = $NLat;
+		$UFields["UF_METHOD_OBTAINING_LON"] = $NLon;
+		
+		$UFields["UF_METHOD_OBTAINING_ADDRESS"] = $NAddress;
+		
+		foreach($DeliveryZones as $key => $value){
+			if($value["ID"] == $NZoneId){
+				$UFields["UF_METHOD_OBTAINING_DELIVERY_ZONE_ID"] = $NZoneId;
+				break;
+			}
+		}
+	}
 
 	
 	if(!empty($UFields)){
@@ -58,6 +90,8 @@ if($Action == "save"){
 				!empty($UFields["UF_METHOD_OBTAINING_LAT"])
 				&&
 				!empty($UFields["UF_METHOD_OBTAINING_LON"])
+				&&
+				!empty($UFields["UF_METHOD_OBTAINING_DELIVERY_ZONE_ID"])
 			){
 				$Result["STATUS"] = true;
 			} else {
@@ -86,26 +120,14 @@ if($Action == "save"){
 		
 	}
 	
+	
+	
 	echo json_encode($Result);
 	die();
 }
-$Hb9 = PhpInterface\Libs\Help::GetHighloadBlock(9);
-$Query = $Hb9::getList(array("select" => array("*")));
-while($Answer = $Query->Fetch()){
-	
-	if(!empty($Answer["UF_FILE_GEOJSON"])){
-		$DeliveryZones[] = array(
-			"ID" => $Answer["ID"],
-			"FILE" => CFile::GetPath($Answer["UF_FILE_GEOJSON"])
-		);
-	}
-	
-	
-}
-
 ?>
 
-<script src="https://api-maps.yandex.ru/2.1/?apikey=81d3b7c6-6633-4e29-9dde-0ef1c393106b&lang=ru_RU"></script>
+<script src="https://api-maps.yandex.ru/2.1/?apikey=62296741-e452-4ca8-a86c-83a8e9e5c179&load=package.full&lang=ru-RU"></script>
 <script src="https://cdn.jsdelivr.net/npm/suggestions-jquery@20.3.0/dist/js/jquery.suggestions.min.js"></script>
 <link href="https://cdn.jsdelivr.net/npm/suggestions-jquery@20.3.0/dist/css/suggestions.min.css" type="text/css" rel="stylesheet"/>
 
@@ -113,11 +135,10 @@ while($Answer = $Query->Fetch()){
 	<form id="MethodObtainingForm">
 		<input type="hidden" name="METHOD_OBTAINING_TYPE_ID" value="<?=$UserData["TYPE_ID"]?>"/>
 		<input type="hidden" name="METHOD_OBTAINING_STORE_ID" value="<?=$UserData["STORE"]["ID"]?>"/>
-		<input type="hidden" name="METHOD_OBTAINING_DELIVERY_ZONE_ID" value=""/>
-		<input type="hidden" name="METHOD_OBTAINING_ADDRESS" value=""/>
-		<input type="hidden" name="METHOD_OBTAINING_LAT" value=""/>
-		<input type="hidden" name="METHOD_OBTAINING_LON" value=""/>
-		
+		<input type="hidden" name="METHOD_OBTAINING_DELIVERY_ZONE_ID" value="<?=$UserData["ZONE_ID"]?>"/>
+		<input type="hidden" name="METHOD_OBTAINING_ADDRESS" value="<?=$UserData["ADDRESS"]?>"/>
+		<input type="hidden" name="METHOD_OBTAINING_LAT" value="<?=$UserData["LAT"]?>"/>
+		<input type="hidden" name="METHOD_OBTAINING_LON" value="<?=$UserData["LON"]?>"/>
 		
 		<div class="popup-outer-box" id="popup-delivery" style="display: block" >
 			<div class="popup-box">
@@ -160,7 +181,7 @@ while($Answer = $Query->Fetch()){
 										<?endforeach;?>
 									</ul>
 									<div class="tabs__content">
-										<div>
+										<div style="display: <?=($UserData["TYPE_ID"] == 1 ? "block" : "none")?>">
 											<div class="popup-delivery__shops">
 												<div class="popup-delivery__shops-items">
 													<div class="shop-block">
@@ -181,7 +202,7 @@ while($Answer = $Query->Fetch()){
 												</div>
 											</div>
 										</div>
-										<div>
+										<div style="display: <?=($UserData["TYPE_ID"] == 2 ? "block" : "none")?>">
 											<div class="popup-delivery__shops-items">
 												<div class="popup-delivery__shops-title">
 													Адрес доставки:
@@ -191,7 +212,7 @@ while($Answer = $Query->Fetch()){
 														<span>
 															Город, улица, дом
 														</span>
-														<a class="popup-delivery__shops-input-link" href="">
+														<a class="popup-delivery__shops-input-link" id="MethodObtainingDefine" href="javascript:void(0)">
 															<svg width="24" height="24">
 																<use xlink:href="<?=SITE_TEMPLATE_PATH?>/img/sprite.svg#compass-icon">
 																</use>
@@ -199,7 +220,7 @@ while($Answer = $Query->Fetch()){
 														</a>
 													</div>
 													<div class="popup-delivery__shops-input-field">
-														<input type="text" id="MethodObtainingAddress" placeholder="Введите адрес, чтобы найти ближайшие магазины">
+														<input type="text" id="MethodObtainingAddress" value="<?=$UserData["ADDRESS"]?>" placeholder="Введите адрес, чтобы найти ближайшие магазины">
 													</div>
 												</div>
 											</div>
@@ -218,17 +239,15 @@ while($Answer = $Query->Fetch()){
 											<li id="MethodObtainingTabListsMap">
 												На карте
 											</li>
-											<li id="MethodObtainingTabListsList">
+											<li style="display: <?=($UserData["TYPE_ID"] == 2 ? "none" : "block")?>" id="MethodObtainingTabListsList">
 												Списком
 											</li>
 										</ul>
 										<div class="tabs__content">
 											<div>
-												<div id="MethodObtainingMap" class="popup-delivery__map">
-													
-												</div>
+												<div id="MethodObtainingMap" class="popup-delivery__map"></div>
 											</div>
-											<div id="MethodObtainingTabContentList">
+											<div style="display: <?=($UserData["TYPE_ID"] == 2 ? "none" : "block")?> id="MethodObtainingTabContentList">
 												<div class="popup-delivery__list">
 													<?foreach($Stores as $key => $value):?>
 													<div data-store="" data-id="<?=$value["ID"]?>" class="popup-delivery__list-item">
@@ -269,21 +288,46 @@ while($Answer = $Query->Fetch()){
 		MapObjectManager: null,
 		IsSend: false,
 		Params:{},
+		MapZone: null,
+		IsLoadDeliveryZones: false,
 		Init: function(Params){
 			
 			this.Params = Params;
 			$("#MethodObtainingForm").submit($.proxy(this.EventSubmitForm,this));
 			$("#MethodObtainingForm [data-type]").click($.proxy(this.EventClickType,this));
 			$("#MethodObtainingForm [data-store]").click($.proxy(this.EventClickStore,this));
+			$("#MethodObtainingDefine").click($.proxy(this.EventClickDefine,this));
+			
 			
 			this.YmapsWaiter();
 			this.SuggestionsWaiter();		
 			this.LoadDeliveryZones();
-			
-			//
-			
 		},
-		
+		EventClickDefine: function(){
+			
+			
+			if ("geolocation" in navigator) {
+				navigator.geolocation.getCurrentPosition(
+					function(Result){
+						
+						if(Result.coords.latitude && Result.coords.longitude){
+							MethodObtainingForm.SetDeliveryData(Result.coords.latitude,Result.coords.longitude,"");
+						}
+						
+					},
+					function(Result){
+						MethodObtainingForm.SetErrorMessage("Не удалось определить автоматически местоположение");
+					},
+					{
+						enableHighAccuracy: true,
+						timeout: 10000,
+						maximumAge: 0 
+					}
+				);
+			}
+			
+			return false;
+		},
 		SuggestionsWaiter: function(){
 			if(typeof $.Suggestions == "function"){
 				this.SuggestionsInit();
@@ -293,28 +337,37 @@ while($Answer = $Query->Fetch()){
 		},	
 		SuggestionsInit: function(){
 			
-			console.log("SuggestionsInit");
-			
 			$("#MethodObtainingAddress").suggestions({
 				token: "d25c061a178900ad6230b608fcd9348ca2fbb0f1",
 				type: "ADDRESS",
-				onSelect:function(Data){
-				}
+				onSelect: $.proxy(this.SuggestionsSelect,this)
 			});
 			
 		},
+		SuggestionsSelect: function(Result){
+			this.SetErrorMessage("");
+			this.SetDeliveryData("","",Result.value);
+		},
 		LoadDeliveryZones: function(){
 			var i;
+			var Flag = true;
 			for(i in this.Params.DELIVERY_ZONES){
 				if(typeof this.Params.DELIVERY_ZONES[i].FILE_DATA == "undefined"){
 					$.getJSON(this.Params.DELIVERY_ZONES[i].FILE, $.proxy(this.LoadDeliveryZonesSuccess,this));
+					Flag = false;
 					break;
 				}
 			}
+			
+			if(Flag){
+				this.IsLoadDeliveryZones = true;
+			}
+			
 		},
 		LoadDeliveryZonesSuccess: function(Result){
 			var i,j,k;
 			var Item;
+			var GObj = null
 			
 			for(i in this.Params.DELIVERY_ZONES){
 				if(typeof this.Params.DELIVERY_ZONES[i].FILE_DATA == "undefined"){
@@ -326,16 +379,12 @@ while($Answer = $Query->Fetch()){
 					
 					for(j in Item.geometry.coordinates){
 						for(k in Item.geometry.coordinates[j]){
-							
 							Item.geometry.coordinates[j][k] = [Item.geometry.coordinates[j][k][1],Item.geometry.coordinates[j][k][0]];
-							
-							
 						}
-						
 					}
-				
 					
 					this.Params.DELIVERY_ZONES[i].FILE_DATA = Item;
+					
 					break;
 				}
 			}
@@ -346,129 +395,190 @@ while($Answer = $Query->Fetch()){
 			if(!this.Map){
 				this.Map = new ymaps.Map("MethodObtainingMap", {
 					center: [43.312791, 45.731304],
-					zoom: 12,
+					zoom: 11,
 					//type: 'yandex#<?=$arResult['ALL_MAP_TYPES'][$arParams['INIT_MAP_TYPE']]?>'
 				});
 				
-				
 				//this.Map.behaviors.disable('scrollZoom');
-				
-				
-				
 				
 				this.MapObjectManager = new ymaps.ObjectManager();
 				
-				this.MapObjectManager.events.add('click', $.proxy(this.EventClickMapObjectManager,this));
-				
 				this.Map.geoObjects.add(this.MapObjectManager);
+				this.Map.events.add('click', $.proxy(this.EventClickMap,this))
 			}
 			
 			this.MapObjectManager.removeAll();
+			
+			if(this.MapZone){
+				this.MapZone.removeFromMap(this.Map);
+			}
+			
+			
 			this.MapObjectManagerRemoveAll();
 		},
-		EventClickMapObjectManager: function(e){
+		EventClickMap: function(e){
 			var TypeId = parseInt($("#MethodObtainingForm input[name='METHOD_OBTAINING_TYPE_ID']").val());
-			var ObjectId = 0;
 			var Coords = [];
-			var IHere= null;
+			
 			if(TypeId == 2){
 				Coords = e.get('coords');
-				ObjectId = e.get('objectId');
+				this.SetErrorMessage("");
+				this.SetDeliveryData(Coords[0],Coords[1],"");
+			}
+			return false;
+		},
+		DeliveryData:{
+			Step: 0,
+			Lat: "",
+			Lon: "",
+			Address: "",
+			ZoneId: 0
+		},
+		SetDeliveryData: function(Lat,Lon,Address){
+			var IHere;
+			var IsRestart = true;
+			
+			//г Грозный, р-н Байсангуровский, ул Рассветная, д 1 
+			//MethodObtainingForm.DeliveryData
+			
+			if(this.DeliveryData.Step == 3){
+				
+				var Zone = this.MapZone.searchContaining([this.DeliveryData.Lat,this.DeliveryData.Lon]).get(0);
+				if(typeof Zone != "undefined"){
+					this.DeliveryData.ZoneId = Zone.properties._data.hintContent
+				}
+				
+				this.MapObjectManager.add({
+				    type: 'Feature',
+				    id: "IHere",
+				    geometry: {
+				        type: 'Point',
+				        coordinates: [this.DeliveryData.Lat,this.DeliveryData.Lon] 
+				    },
+				    properties: {
+				        balloonContent: "Я здесь",
+				        hintContent: "Я здесь",
+				    }
+				},{});
+				
+				this.Map.setCenter([this.DeliveryData.Lat,this.DeliveryData.Lon] );
+				
+				$("#MethodObtainingForm input[name='METHOD_OBTAINING_DELIVERY_ZONE_ID']").val(this.DeliveryData.ZoneId);
+				$("#MethodObtainingForm input[name='METHOD_OBTAINING_ADDRESS']").val(this.DeliveryData.Address);
+				$("#MethodObtainingForm input[name='METHOD_OBTAINING_LAT']").val(this.DeliveryData.Lat);
+				$("#MethodObtainingForm input[name='METHOD_OBTAINING_LON']").val(this.DeliveryData.Lon);
+				
+				
+				IsRestart = false;
+				
+				if(this.DeliveryData.ZoneId > 0){
+					
+				} else {
+					this.SetErrorMessage("Указанный адрес находиться за пределами зоны доставки");
+				}
+				
+			}else if(this.DeliveryData.Step == 2){
+				
+				
+				if(this.DeliveryData.Address != ""){
+					
+					ymaps.geocode(this.DeliveryData.Address).then(function (Result) {
+						var Coordinates = Result.geoObjects.get(0).geometry.getCoordinates();
+						MethodObtainingForm.DeliveryData.Lat = Coordinates[0];
+						MethodObtainingForm.DeliveryData.Lon = Coordinates[1];
+						MethodObtainingForm.DeliveryData.Step = 3;
+						MethodObtainingForm.SetDeliveryData();
+					});
+					
+				} else if(this.DeliveryData.Lat != "" && this.DeliveryData.Lon != ""){
+					
+					ymaps.geocode([this.DeliveryData.Lat,this.DeliveryData.Lon]).then(function (Result) {
+						MethodObtainingForm.DeliveryData.Address = Result.geoObjects.get(0).getAddressLine();
+						MethodObtainingForm.DeliveryData.Step = 3;
+						MethodObtainingForm.SetDeliveryData();
+						
+					});
+					
+				}
+				IsRestart = false;
+				
+				
+			} else if(this.DeliveryData.Step == 1){
 				
 				IHere = this.MapObjectManager.objects.getById("IHere");
-				
-				if(IHere != null){
+				if(IHere){
 					this.MapObjectManager.remove(IHere);
-					this.SetDeliveryData(false);
-					
-					
 				} else {
-					
-					this.SetDeliveryData(true,Coords[0],Coords[1],"",ObjectId);
-					
-					
-					this.MapObjectManager.add({
-					    type: 'Feature',
-					    id: "IHere",
-					    geometry: {
-					        type: 'Point',
-					        coordinates: Coords 
-					    },
-					    properties: {
-					        balloonContent: "Я здесь",
-					        hintContent: "Я здесь",
-					    }
-					},{});
+					this.DeliveryData.Step = 2
 				}
-				
-				
-				
-			}
-		},
-		SetDeliveryData: function(Flag,Lat,Lon,Address,ZoneId){
-			
-			if(Flag){
-				
-				
-				
-				if(Lat != ""){
-					$("#MethodObtainingForm input[name='METHOD_OBTAINING_LAT']").val(Lat);	
-				}
-				
-				if(Lon != ""){
-					$("#MethodObtainingForm input[name='METHOD_OBTAINING_LON']").val(Lon);
-				}
-				
-				if(Address != ""){
-					$("#MethodObtainingForm input[name='METHOD_OBTAINING_ADDRESS']").val(Address);
-				} else {
-					
-					
-					
-					if(Lat != "" && Lon != "" && typeof ymaps != "undefined"){
-						
-						console.log([Lat,Lon]);
-						
-						ymaps.geocode([Lat,Lon]).then(function (Result) {
-							
-							console.log(Result);
-							
-						});
-						
-					}
-					
-				}
-				
-				if(ZoneId != ""){
-					$("#MethodObtainingForm input[name='METHOD_OBTAINING_DELIVERY_ZONE_ID']").val(ZoneId);
-				}
-				
-				
-				
-				
-				
-				
-				
 				
 			} else {
+				this.DeliveryData = {
+					Step: 1,
+					Lat: Lat,
+					Lon: Lon,
+					Address: Address,
+					ZoneId: 0
+				}
+				
 				$("#MethodObtainingForm input[name='METHOD_OBTAINING_DELIVERY_ZONE_ID']").val("");
 				$("#MethodObtainingForm input[name='METHOD_OBTAINING_ADDRESS']").val("");
 				$("#MethodObtainingForm input[name='METHOD_OBTAINING_LAT']").val("");
 				$("#MethodObtainingForm input[name='METHOD_OBTAINING_LON']").val("");
 			}
+			
+			if(IsRestart){
+				setTimeout($.proxy(this.SetDeliveryData,this),500);
+			}
+			
 		},
 		
 		MapObjectManagerAdd: function(){
 			var i;
 			var TypeId = parseInt($("#MethodObtainingForm input[name='METHOD_OBTAINING_TYPE_ID']").val());
+			var GObj;
+			var GObjs = [];
 			if(TypeId == 2){
 				
-				
-				for(i in this.Params.DELIVERY_ZONES){
-					this.MapObjectManager.add(this.Params.DELIVERY_ZONES[i].FILE_DATA);
+				if(this.IsLoadDeliveryZones){
+					for(i in this.Params.DELIVERY_ZONES){
+						
+						
+						//this.MapObjectManager.add(this.Params.DELIVERY_ZONES[i].FILE_DATA);
+						
+						GObj = new ymaps.GeoObject({
+							geometry:{
+								coordinates:this.Params.DELIVERY_ZONES[i].FILE_DATA.geometry.coordinates,
+								type:'Polygon'
+							},
+							properties:{
+								hintContent: this.Params.DELIVERY_ZONES[i].FILE_DATA.id
+							}
+						},{
+							"mediumVehiclePrice":"80",
+							"heavyVehiclePrice":"112",
+							"fill":"#177bc9",
+							"fill-opacity":"0.6",
+							"stroke":"#82cdff",
+							"stroke-width":"0",
+							"stroke-opacity":"0.9",
+						});
+						
+						
+						
+						
+						GObjs.push(GObj);
+						
+					}
+					
+					this.MapZone =ymaps.geoQuery(GObjs).addToMap(this.Map);
+					
+					
+				} else {
+					
+					setTimeout( $.proxy(this.MapObjectManagerAdd,this) ,1000);
+					
 				}
-				
-				
 				
 			} else {
 				
@@ -497,6 +607,7 @@ while($Answer = $Query->Fetch()){
 				}
 			}
 			
+			
 		},
 		MapObjectManagerRemoveAll: function(){
 			setTimeout(function(){
@@ -510,7 +621,7 @@ while($Answer = $Query->Fetch()){
 		},
 		
 		YmapsWaiter: function(){
-			if(typeof ymaps !== 'undefined' &&  typeof ymaps.ObjectManager !== 'undefined'){
+			if(typeof ymaps !== 'undefined' &&  typeof ymaps.ObjectManager !== 'undefined' && typeof ymaps.GeoObject !== 'undefined'){
 				ymaps.ready($.proxy(this.YmapsInit,this));
 			} else {
 				setTimeout($.proxy(this.YmapsWaiter,this), 500);

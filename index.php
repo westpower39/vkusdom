@@ -72,8 +72,8 @@ $APPLICATION->SetTitle("Главная");
 	"custom:catalog.section.products", 
 	"", 
 	[
-		"IBLOCK_ID" => "4",
-		"SECTION_ID" => 17
+		"IBLOCK_ID" => "17",
+		"SECTION_ID" => 353
 	],
 	false
 );?>
@@ -81,7 +81,7 @@ $APPLICATION->SetTitle("Главная");
 	"custom:catalog.section.popular", 
 	"", 
 	[
-		"IBLOCK_ID" => "4",
+		"IBLOCK_ID" => "17",
 	],
 	false
 );?>
@@ -157,8 +157,8 @@ $APPLICATION->SetTitle("Главная");
 	"custom:catalog.section.products", 
 	"", 
 	[
-		"IBLOCK_ID" => "4",
-		"SECTION_ID" => 17,
+		"IBLOCK_ID" => "17",
+		"SECTION_ID" => 328,
 		"THEME" => 1
 	],
 	false
@@ -183,8 +183,8 @@ $APPLICATION->SetTitle("Главная");
 	"custom:catalog.section.products", 
 	"", 
 	[
-		"IBLOCK_ID" => "4",
-		"SECTION_ID" => 17,
+		"IBLOCK_ID" => "17",
+		"SECTION_ID" => 359,
 		"THEME" => 2
 	],
 	false
@@ -193,9 +193,9 @@ $APPLICATION->SetTitle("Главная");
 	"custom:iblock.section.baner", 
 	"", 
 	[
-		"IBLOCK_ID" => "4",
+		"IBLOCK_ID" => "17",
 		"IBLOCK_TYPE" => "1c_catalog",
-		"SECIONS_ID" => array("16","138","")
+		"SECIONS_ID" => array("274","264","")
 	],
 	false
 );?>
@@ -271,8 +271,8 @@ $APPLICATION->SetTitle("Главная");
 	"custom:catalog.section.products", 
 	"", 
 	[
-		"IBLOCK_ID" => "5",
-		"SECTION_ID" => 17,
+		"IBLOCK_ID" => "14",
+		"SECTION_ID" => 326,
 		"THEME" => 3
 	],
 	false

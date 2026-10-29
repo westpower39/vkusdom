@@ -7,12 +7,31 @@ class Help {
 	
 	private static $IsInit = false;
 	private static $HighloadBlock = array();
+	private static $DefaultProductWeight = -1;
 	
 	private static function Init(){
 		if(!self::$IsInit){
 			self::$IsInit = true;	
 			Loader::IncludeModule("highloadblock");
 		}
+	}
+	
+	public static function DefaultProductWeight(){
+		self::Init();
+		
+		if(self::$DefaultProductWeight == -1){
+			$Hb10 = self::GetHighloadBlock(10);
+		
+			$Query = $Hb10::getList(array(
+				"select" => array("*"),
+				"limit" => 1
+			));
+			if($Answer = $Query->Fetch()){
+				self::$DefaultProductWeight = floatval($Answer["UF_WEIGHT"]);
+			}
+		}
+		
+		return self::$DefaultProductWeight;
 	}
 	
 	public static function Declension($Number = 1, $Titles = array()) {
