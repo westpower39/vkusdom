@@ -15,8 +15,8 @@ use Westpower\Mobile\Dictionary\PropertyCode;
 use Westpower\Mobile\Exception\ApiException;
 
 /**
- * User profile (TZ 4.7): full name, birth date, e-mail; the phone is changed only through
- * phone verification (PhoneAuthService). Notification settings are awaiting the site storage — returned as null.
+ * User profile (TZ 4.7): full name, birth date, e-mail; the phone is not changed
+ * (phone change is a stub, its need is under discussion). Notification settings are awaiting the site storage — returned as null.
  *
  * Full name is one field, as on the site: it is stored in NAME (decision 29.10.2026).
  * Users with LAST_NAME/SECOND_NAME filled (admin, imported) get them joined as "Last First Middle".
@@ -70,7 +70,7 @@ final class ProfileService
 		}
 		if (array_key_exists('phone', $input))
 		{
-			throw ApiException::validation('Номер меняется с подтверждением: POST /profile/phone/verifications', 'phone');
+			throw ApiException::validation('Смена номера пока недоступна', 'phone');
 		}
 
 		if (!empty($fields))
@@ -81,17 +81,6 @@ final class ProfileService
 				throw ApiException::validation(strip_tags((string)$user->LAST_ERROR), 'profile');
 			}
 		}
-
-		return $this->get($context);
-	}
-
-	public function changePhone(AuthContext $context, string $verificationId, ?string $code): array
-	{
-		if ($verificationId === '')
-		{
-			throw ApiException::validation('Передайте verificationId', 'verificationId');
-		}
-		(new PhoneAuthService())->confirmPhoneChange((int)$context->userId, $verificationId, $code);
 
 		return $this->get($context);
 	}

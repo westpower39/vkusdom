@@ -1130,7 +1130,7 @@ paths:
           "$ref": "#/components/responses/TooManyRequests"
         '503':
           "$ref": "#/components/responses/Unavailable"
-      description: "Код отправляется на новый номер. 400 — номер совпадает с текущим или привязан к другому аккаунту. Подтверждение звонком ожидает реализации на сайте (503). Статус — GET /auth/verifications/{id}. В тестовом режиме SMS не отправляется, код фиксированный."
+      description: "Подтверждение нового номера.\n\n**Заглушка:** нужность смены номера обсуждается, сейчас всегда отвечает 503 SERVICE_UNAVAILABLE."
       requestBody:
         required: true
         content:
@@ -1164,7 +1164,7 @@ paths:
           "$ref": "#/components/responses/NotFound"
         '503':
           "$ref": "#/components/responses/Unavailable"
-      description: "Новый номер становится номером для входа. Токены остаются действительными."
+      description: "Смена номера по коду подтверждения.\n\n**Заглушка:** нужность смены номера обсуждается, сейчас всегда отвечает 503 SERVICE_UNAVAILABLE."
       requestBody:
         required: true
         content:
