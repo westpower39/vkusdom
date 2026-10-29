@@ -12,11 +12,12 @@ use Westpower\Mobile\Exception\ApiException;
 use Westpower\Mobile\Service\Formatter;
 
 /**
- * Phone verification through the standard Bitrix phone auth (CUser::SendPhoneCode / CUser::VerifyPhoneCode,
- * b_user_phone_auth). The SMS/call providers are set up on the site (messageservice) — not in this module.
+ * Phone verification. In production the login is by call only (no SMS codes, decision 29.10.2026);
+ * the New-Tel call verification is awaiting the site service. Users are found and registered
+ * in the standard phone auth table (b_user_phone_auth).
  *
- * While the site providers are not ready, test mode is a stub: no SMS is sent, the code is fixed,
- * a call verification is confirmed immediately. Real call verification is awaiting the site implementation.
+ * Test mode is a stub for the app development: the "sms" channel accepts a fixed code,
+ * a call verification is confirmed immediately.
  *
  * The verification ID is a signed token {phone, channel, time}: no own storage.
  */
@@ -25,9 +26,7 @@ final class PhoneAuthService
 	public const CHANNEL_SMS = 'sms';
 	public const CHANNEL_CALL = 'call';
 
-	private const SMS_EVENT = 'SMS_USER_CONFIRM_NUMBER';
 	private const SIGN_SALT = 'westpower.mobile.verification';
-	private const STANDARD_CODE_LENGTH = 6;
 
 	public function start(string $phone, string $channel): array
 	{
@@ -43,28 +42,7 @@ final class PhoneAuthService
 
 		if (!$this->isTestMode())
 		{
-			if ($channel === self::CHANNEL_CALL)
-			{
-				throw ApiException::unavailable('Вход по звонку пока недоступен, используйте SMS');
-			}
-
-			$userId = $this->ensureUser($normalized);
-			$retryAfter = $this->resendAfter($userId);
-			if ($retryAfter > 0)
-			{
-				throw new ApiException(
-					ErrorCode::TOO_MANY_REQUESTS,
-					sprintf('Повторно запросить код можно через %d сек.', $retryAfter),
-					['retryAfter' => $retryAfter]
-				);
-			}
-
-			$result = \CUser::SendPhoneCode($normalized, self::SMS_EVENT, Config::siteId());
-			if (!$result->isSuccess())
-			{
-				AddMessage2Log('SendPhoneCode failed: ' . implode('; ', $result->getErrorMessages()), Config::MODULE_ID);
-				throw ApiException::unavailable('Не удалось отправить SMS, попробуйте позже');
-			}
+			$this->checkProductionChannel($channel);
 		}
 
 		$payload = ['phone' => $normalized, 'channel' => $channel, 'time' => time()];
@@ -97,22 +75,15 @@ final class PhoneAuthService
 				throw ApiException::validation('Введите код из SMS', 'code');
 			}
 
-			if ($this->isTestMode())
+			if (!$this->isTestMode())
 			{
-				if ($code !== Config::get('auth_test_code'))
-				{
-					throw new ApiException(ErrorCode::AUTH_CODE_INVALID, 'Неверный код');
-				}
-				$userId = $this->ensureUser($phone);
+				$this->checkProductionChannel(self::CHANNEL_SMS);
 			}
-			else
+			if ($code !== Config::get('auth_test_code'))
 			{
-				$userId = (int)\CUser::VerifyPhoneCode($phone, $code);
-				if ($userId <= 0)
-				{
-					throw new ApiException(ErrorCode::AUTH_CODE_INVALID, 'Неверный код');
-				}
+				throw new ApiException(ErrorCode::AUTH_CODE_INVALID, 'Неверный код');
 			}
+			$userId = $this->ensureUser($phone);
 		}
 		elseif ($this->isTestMode())
 		{
@@ -120,7 +91,7 @@ final class PhoneAuthService
 		}
 		else
 		{
-			throw ApiException::unavailable('Вход по звонку пока недоступен, используйте SMS');
+			$this->checkProductionChannel(self::CHANNEL_CALL);
 		}
 
 		$this->activate($userId);
@@ -183,16 +154,17 @@ final class PhoneAuthService
 		}
 	}
 
-	private function resendAfter(int $userId): int
+	/**
+	 * Production login is by call only; the call itself is awaiting the site New-Tel service.
+	 */
+	private function checkProductionChannel(string $channel): void
 	{
-		$interval = defined('CUser::PHONE_CODE_RESEND_INTERVAL') ? (int)\CUser::PHONE_CODE_RESEND_INTERVAL : 60;
-		$row = UserPhoneAuthTable::getList(['filter' => ['=USER_ID' => $userId], 'select' => ['DATE_SENT']])->fetch();
-		if (!$row || !$row['DATE_SENT'])
+		if ($channel === self::CHANNEL_SMS)
 		{
-			return 0;
+			throw ApiException::validation('Вход только по звонку', 'channel');
 		}
 
-		return max(0, $row['DATE_SENT']->getTimestamp() + $interval - time());
+		throw ApiException::unavailable('Вход по звонку пока недоступен');
 	}
 
 	private function toArray(string $id, array $payload): array
@@ -207,7 +179,7 @@ final class PhoneAuthService
 			'status' => $status,
 			'expiresAt' => date(DATE_ATOM, $payload['time'] + $this->ttl()),
 			'resendAfter' => max(0, $payload['time'] + 60 - time()),
-			'codeLength' => $isCall ? null : ($this->isTestMode() ? strlen(Config::get('auth_test_code')) : self::STANDARD_CODE_LENGTH),
+			'codeLength' => $isCall ? null : strlen(Config::get('auth_test_code')),
 			'callPhone' => $isCall ? Config::get('auth_test_call_phone') : null,
 		];
 	}
