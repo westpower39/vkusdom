@@ -157,7 +157,7 @@ final class PhoneAuthService
 	/**
 	 * Production login is by call only; the call itself is awaiting the site New-Tel service.
 	 */
-	private function checkProductionChannel(string $channel): void
+	private function checkProductionChannel(string $channel): never
 	{
 		if ($channel === self::CHANNEL_SMS)
 		{
