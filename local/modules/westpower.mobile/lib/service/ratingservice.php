@@ -26,6 +26,7 @@ final class RatingService
 	public function __construct()
 	{
 		Loader::includeModule('sale');
+		Loader::includeModule('iblock');
 	}
 
 	public function list(AuthContext $context, int $page, int $limit): array
