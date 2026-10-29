@@ -57,6 +57,10 @@ final class PropertyCode
 	public const ORDER_DELIVERY_HAS_ELEVATOR = 'DELIVERY_HAS_ELEVATOR';
 	public const ORDER_DELIVERY_HAS_FREIGHT_ELEVATOR = 'DELIVERY_HAS_FREIGHT_ELEVATOR';
 
+	// User notification settings (site "personal data" page)
+	public const USER_EMAIL_NOTIFICATIONS = 'UF_EMAIL_NEWSLETTERS';
+	public const USER_SMS_NOTIFICATIONS = 'UF_SMS_NOTIFICATIONS';
+
 	// User fields with personal data (site "method of obtaining" address), cleared on account deletion
 	public const USER_PERSONAL_FIELDS = [
 		'UF_METHOD_OBTAINING_ADDRESS',

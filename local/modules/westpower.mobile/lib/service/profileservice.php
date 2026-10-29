@@ -16,7 +16,8 @@ use Westpower\Mobile\Exception\ApiException;
 
 /**
  * User profile (TZ 4.7): full name, birth date, e-mail; the phone is not changed
- * (phone change is a stub, its need is under discussion). Notification settings are awaiting the site storage — returned as null.
+ * (phone change is a stub, its need is under discussion). Notification settings are the site user fields
+ * (e-mail, SMS); there is no push flag on the site yet, so isPushEnabled is null.
  *
  * Full name is one field, as on the site: it is stored in NAME (decision 29.10.2026).
  * Users with LAST_NAME/SECOND_NAME filled (admin, imported) get them joined as "Last First Middle".
@@ -29,7 +30,7 @@ final class ProfileService
 	{
 		$user = UserTable::getList([
 			'filter' => ['=ID' => $context->userId],
-			'select' => ['ID', 'NAME', 'LAST_NAME', 'SECOND_NAME', 'EMAIL', 'PERSONAL_BIRTHDAY'],
+			'select' => ['ID', 'NAME', 'LAST_NAME', 'SECOND_NAME', 'EMAIL', 'PERSONAL_BIRTHDAY', PropertyCode::USER_EMAIL_NOTIFICATIONS, PropertyCode::USER_SMS_NOTIFICATIONS],
 		])->fetch();
 		if (!$user)
 		{
@@ -42,7 +43,11 @@ final class ProfileService
 			'fullName' => self::fullName($user),
 			'birthDate' => $user['PERSONAL_BIRTHDAY'] instanceof Date ? $user['PERSONAL_BIRTHDAY']->format(self::BIRTH_DATE_FORMAT) : null,
 			'email' => (string)$user['EMAIL'] !== '' ? (string)$user['EMAIL'] : null,
-			'notifications' => null,
+			'notifications' => [
+				'isPushEnabled' => null,
+				'isEmailEnabled' => (bool)$user[PropertyCode::USER_EMAIL_NOTIFICATIONS],
+				'isSmsEnabled' => (bool)$user[PropertyCode::USER_SMS_NOTIFICATIONS],
+			],
 		];
 	}
 
@@ -83,6 +88,33 @@ final class ProfileService
 		}
 
 		return $this->get($context);
+	}
+
+	public function updateNotifications(AuthContext $context, array $input): array
+	{
+		$fields = [];
+		foreach (['isEmailEnabled' => PropertyCode::USER_EMAIL_NOTIFICATIONS, 'isSmsEnabled' => PropertyCode::USER_SMS_NOTIFICATIONS] as $key => $field)
+		{
+			if (array_key_exists($key, $input))
+			{
+				if (!is_bool($input[$key]))
+				{
+					throw ApiException::validation('Значение должно быть true или false', $key);
+				}
+				$fields[$field] = $input[$key] ? 1 : 0;
+			}
+		}
+
+		if (!empty($fields))
+		{
+			$user = new \CUser();
+			if (!$user->Update((int)$context->userId, $fields))
+			{
+				throw ApiException::validation(strip_tags((string)$user->LAST_ERROR), 'notifications');
+			}
+		}
+
+		return $this->get($context)['notifications'];
 	}
 
 	/**

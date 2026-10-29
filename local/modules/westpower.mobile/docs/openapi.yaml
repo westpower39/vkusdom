@@ -1052,7 +1052,7 @@ paths:
                         "$ref": "#/components/schemas/Profile"
         '401':
           "$ref": "#/components/responses/Unauthorized"
-      description: "`notifications` = null, пока настройки уведомлений не реализованы на сайте."
+      description: "`notifications.isPushEnabled` = null, пока на сайте нет настройки push."
       security:
         - bearerAuth: []
     put:
@@ -1189,13 +1189,12 @@ paths:
                   - type: "object"
                     properties:
                       data:
-                        nullable: true
-                        example: null
+                        "$ref": "#/components/schemas/NotificationSettings"
+        '400':
+          "$ref": "#/components/responses/ValidationError"
         '401':
           "$ref": "#/components/responses/Unauthorized"
-        '503':
-          "$ref": "#/components/responses/Unavailable"
-      description: "Переключатели push / e-mail / SMS.\n\n**Заглушка:** функция ожидает реализации на сайте, сейчас всегда отвечает 503 SERVICE_UNAVAILABLE."
+      description: "Передаются только изменяемые флаги. Сохраняются e-mail и SMS — те же настройки, что на странице «Личные данные» сайта. `isPushEnabled` пока не сохраняется: на сайте нет такой настройки, в ответе null."
       requestBody:
         required: true
         content:
@@ -1357,7 +1356,7 @@ paths:
           "$ref": "#/components/responses/ValidationError"
         '401':
           "$ref": "#/components/responses/Unauthorized"
-      description: "Список — из оплаченных заказов. `rating` = null, пока хранение оценок не реализовано на сайте."
+      description: "Товары из заказов пользователя, кроме отменённых (как на странице оценок сайта), новые сначала. `rating` — последняя оценка пользователя или null."
       parameters:
         - "$ref": "#/components/parameters/Page"
         - "$ref": "#/components/parameters/Limit"
@@ -1381,11 +1380,17 @@ paths:
                       data:
                         nullable: true
                         example: null
+        '400':
+          "$ref": "#/components/responses/ValidationError"
         '401':
           "$ref": "#/components/responses/Unauthorized"
-        '503':
-          "$ref": "#/components/responses/Unavailable"
-      description: "**Заглушка:** функция ожидает реализации на сайте, сейчас всегда отвечает 503 SERVICE_UNAVAILABLE."
+        '403':
+          description: "FORBIDDEN — товара нет среди покупок пользователя"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/ErrorEnvelope"
+      description: "Оценка привязывается к последней неоценённой покупке товара. Если все покупки уже оценены — меняется последняя оценка. Средний рейтинг товара пересчитывается (общий с сайтом)."
       parameters:
         - "$ref": "#/components/parameters/ProductId"
       requestBody:
@@ -3189,6 +3194,8 @@ components:
       properties:
         isPushEnabled:
           type: "boolean"
+          nullable: true
+          description: "null — настройки push на сайте пока нет"
         isEmailEnabled:
           type: "boolean"
         isSmsEnabled:

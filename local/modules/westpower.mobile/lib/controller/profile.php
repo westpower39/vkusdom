@@ -55,14 +55,10 @@ final class Profile extends Base
 		});
 	}
 
-	/** PUT /api/v1/profile/notifications — awaiting the site storage */
+	/** PUT /api/v1/profile/notifications */
 	public function updateNotificationsAction()
 	{
-		return $this->respond(function () {
-			$this->userContext();
-
-			return $this->notImplemented();
-		});
+		return $this->respond(fn () => (new ProfileService())->updateNotifications($this->userContext(), $this->body()));
 	}
 
 	/** GET /api/v1/order-profiles */
@@ -109,13 +105,13 @@ final class Profile extends Base
 		});
 	}
 
-	/** PUT /api/v1/ratings/products/{productId} — awaiting the site storage */
+	/** PUT /api/v1/ratings/products/{productId} */
 	public function setRatingAction(int $productId)
 	{
-		return $this->respond(function () {
-			$this->userContext();
+		return $this->respond(function () use ($productId) {
+			(new RatingService())->set($this->userContext(), $productId, $this->body()['rating'] ?? null);
 
-			return $this->notImplemented();
+			return null;
 		});
 	}
 

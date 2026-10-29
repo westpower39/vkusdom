@@ -25,6 +25,8 @@ final class EntityCode
 	public const HL_FAVORITES = 'Favorit';
 	public const HL_METHOD_OBTAINING = 'MethodObtaining';
 	public const HL_DELIVERY_TIME = 'DeliveryTime';
+	public const HL_PRODUCT_RATING = 'ProductRating';
+	public const HL_PRODUCT_RATING_TOTAL = 'ProductRatingTotal';
 
 	// Catalog section user field: "popular category" checkbox
 	public const SECTION_UF_POPULAR = 'UF_POPULAR';
