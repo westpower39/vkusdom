@@ -167,10 +167,11 @@ final class RatingService
 			return [];
 		}
 
+		// UF_PRODUCT_ID is a double field on the site: an "in list" filter on it fails in Bitrix, so filter here.
 		$dataClass = EntityResolver::hlDataClass(EntityCode::HL_PRODUCT_RATING);
 		$ratings = [];
 		$rows = $dataClass::getList([
-			'filter' => ['=UF_USER_ID' => $userId, '@UF_PRODUCT_ID' => $productIds],
+			'filter' => ['=UF_USER_ID' => $userId],
 			'select' => ['UF_PRODUCT_ID', 'UF_RATING'],
 			'order' => ['ID' => 'DESC'],
 		]);
@@ -179,7 +180,7 @@ final class RatingService
 			$ratings[(int)$row['UF_PRODUCT_ID']] ??= (int)$row['UF_RATING'];
 		}
 
-		return $ratings;
+		return array_intersect_key($ratings, array_flip($productIds));
 	}
 
 	/**
