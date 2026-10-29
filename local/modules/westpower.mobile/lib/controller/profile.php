@@ -2,6 +2,7 @@
 
 namespace Westpower\Mobile\Controller;
 
+use Westpower\Mobile\Auth\PhoneAuthService;
 use Westpower\Mobile\Service\OrderProfileService;
 use Westpower\Mobile\Service\Pagination;
 use Westpower\Mobile\Service\ProfileService;
@@ -23,6 +24,44 @@ final class Profile extends Base
 	public function updateProfileAction()
 	{
 		return $this->respond(fn () => (new ProfileService())->update($this->userContext(), $this->body()));
+	}
+
+	/** DELETE /api/v1/profile */
+	public function deleteProfileAction()
+	{
+		return $this->respond(function () {
+			(new ProfileService())->delete($this->userContext());
+
+			return null;
+		});
+	}
+
+	/** POST /api/v1/profile/phone/verifications */
+	public function phoneVerificationAction()
+	{
+		return $this->respond(function () {
+			$body = $this->body();
+
+			return (new PhoneAuthService())->startPhoneChange(
+				(int)$this->userContext()->userId,
+				(string)($body['phone'] ?? ''),
+				(string)($body['channel'] ?? '')
+			);
+		});
+	}
+
+	/** PUT /api/v1/profile/phone */
+	public function updatePhoneAction()
+	{
+		return $this->respond(function () {
+			$body = $this->body();
+
+			return (new ProfileService())->changePhone(
+				$this->userContext(),
+				(string)($body['verificationId'] ?? ''),
+				isset($body['code']) ? (string)$body['code'] : null
+			);
+		});
 	}
 
 	/** PUT /api/v1/profile/notifications — awaiting the site storage */

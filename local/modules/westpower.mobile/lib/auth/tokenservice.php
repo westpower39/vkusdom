@@ -134,6 +134,19 @@ final class TokenService
 		self::$current = AuthContext::anonymous();
 	}
 
+	/**
+	 * Revokes all app sessions of the user (account deletion).
+	 */
+	public static function revokeUser(int $userId): void
+	{
+		$rows = SessionTable::getList(['filter' => ['=USER_ID' => $userId], 'select' => ['ID']]);
+		while ($row = $rows->fetch())
+		{
+			SessionTable::delete($row['ID']);
+		}
+		self::$current = AuthContext::anonymous();
+	}
+
 	public static function getCoupons(int $sessionId): array
 	{
 		$row = SessionTable::getList(['filter' => ['=ID' => $sessionId], 'select' => ['COUPONS']])->fetch();

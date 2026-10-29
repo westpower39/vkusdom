@@ -1058,7 +1058,7 @@ paths:
     put:
       tags:
         - "profile"
-      summary: "Изменить имя, фамилию, e-mail"
+      summary: "Изменить имя, фамилию, отчество, дату рождения, e-mail"
       responses:
         '200':
           description: "OK"
@@ -1081,6 +1081,96 @@ paths:
           "application/json":
             schema:
               "$ref": "#/components/schemas/ProfileUpdate"
+      security:
+        - bearerAuth: []
+    delete:
+      tags:
+        - "profile"
+      summary: "Удалить аккаунт"
+      responses:
+        '200':
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                allOf:
+                  - "$ref": "#/components/schemas/SuccessEnvelope"
+                  - type: "object"
+                    properties:
+                      data:
+                        nullable: true
+                        example: null
+        '401':
+          "$ref": "#/components/responses/Unauthorized"
+      description: "Аккаунт деактивируется и обезличивается: стираются ФИО, e-mail, телефон, дата рождения, адрес, профили покупателя и избранное, отзываются все токены. Заказы сохраняются для учёта. Номер освобождается: при следующем входе с ним будет создан новый аккаунт. После ответа приложение удаляет токены и переходит в гостевой режим (POST /auth/guest)."
+      security:
+        - bearerAuth: []
+  "/profile/phone/verifications":
+    post:
+      tags:
+        - "profile"
+      summary: "Начать смену номера: подтверждение нового номера"
+      responses:
+        '200':
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                allOf:
+                  - "$ref": "#/components/schemas/SuccessEnvelope"
+                  - type: "object"
+                    properties:
+                      data:
+                        "$ref": "#/components/schemas/Verification"
+        '400':
+          "$ref": "#/components/responses/ValidationError"
+        '401':
+          "$ref": "#/components/responses/Unauthorized"
+        '429':
+          "$ref": "#/components/responses/TooManyRequests"
+        '503':
+          "$ref": "#/components/responses/Unavailable"
+      description: "Код отправляется на новый номер. 400 — номер совпадает с текущим или привязан к другому аккаунту. Подтверждение звонком ожидает реализации на сайте (503). Статус — GET /auth/verifications/{id}. В тестовом режиме SMS не отправляется, код фиксированный."
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              "$ref": "#/components/schemas/VerificationRequest"
+      security:
+        - bearerAuth: []
+  "/profile/phone":
+    put:
+      tags:
+        - "profile"
+      summary: "Сменить номер (код из SMS на новый номер)"
+      responses:
+        '200':
+          description: "OK"
+          content:
+            "application/json":
+              schema:
+                allOf:
+                  - "$ref": "#/components/schemas/SuccessEnvelope"
+                  - type: "object"
+                    properties:
+                      data:
+                        "$ref": "#/components/schemas/Profile"
+        '400':
+          "$ref": "#/components/responses/ValidationError"
+        '401':
+          "$ref": "#/components/responses/Unauthorized"
+        '404':
+          "$ref": "#/components/responses/NotFound"
+        '503':
+          "$ref": "#/components/responses/Unavailable"
+      description: "Новый номер становится номером для входа. Токены остаются действительными."
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              "$ref": "#/components/schemas/PhoneChangeRequest"
       security:
         - bearerAuth: []
   "/profile/notifications":
@@ -3047,6 +3137,15 @@ components:
         lastName:
           type: "string"
           nullable: true
+        secondName:
+          type: "string"
+          nullable: true
+          description: "Отчество"
+        birthDate:
+          type: "string"
+          format: "date"
+          nullable: true
+          example: "1990-05-21"
         email:
           type: "string"
           nullable: true
@@ -3059,18 +3158,41 @@ components:
         - "phone"
         - "name"
         - "lastName"
+        - "secondName"
+        - "birthDate"
         - "email"
         - "notifications"
     ProfileUpdate:
       type: "object"
+      description: "Передаются только изменяемые поля. Пустая строка очищает поле."
       properties:
         name:
           type: "string"
         lastName:
           type: "string"
+        secondName:
+          type: "string"
+        birthDate:
+          type: "string"
+          format: "date"
+          example: "1990-05-21"
+          description: "ГГГГ-ММ-ДД"
         email:
           type: "string"
       required: []
+    PhoneChangeRequest:
+      type: "object"
+      properties:
+        verificationId:
+          type: "string"
+          description: "id из POST /profile/phone/verifications"
+        code:
+          type: "string"
+          nullable: true
+          description: "Для sms"
+      required:
+        - "verificationId"
+        - "code"
     NotificationSettings:
       type: "object"
       properties:

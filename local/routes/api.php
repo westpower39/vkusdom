@@ -76,6 +76,9 @@ return function (RoutingConfigurator $routes) {
 		// Personal account
 		$routes->get('profile', [Controller\Profile::class, 'profile']);
 		$routes->put('profile', [Controller\Profile::class, 'updateProfile']);
+		$routes->delete('profile', [Controller\Profile::class, 'deleteProfile']);
+		$routes->post('profile/phone/verifications', [Controller\Profile::class, 'phoneVerification']);
+		$routes->put('profile/phone', [Controller\Profile::class, 'updatePhone']);
 		$routes->put('profile/notifications', [Controller\Profile::class, 'updateNotifications']);
 		$routes->get('order-profiles', [Controller\Profile::class, 'orderProfiles']);
 		$routes->get('order-profiles/fields', [Controller\Profile::class, 'orderProfileFields']);

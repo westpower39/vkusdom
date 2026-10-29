@@ -5,6 +5,7 @@ namespace Westpower\Mobile\Auth;
 use Bitrix\Main\Config\Option;
 use Bitrix\Main\Security\Sign\BadSignatureException;
 use Bitrix\Main\Security\Sign\Signer;
+use Bitrix\Main\Sms\Event as SmsEvent;
 use Bitrix\Main\UserPhoneAuthTable;
 use Westpower\Mobile\Config;
 use Westpower\Mobile\Dictionary\ErrorCode;
@@ -18,7 +19,7 @@ use Westpower\Mobile\Service\Formatter;
  * While the site providers are not ready, test mode is a stub: no SMS is sent, the code is fixed,
  * a call verification is confirmed immediately. Real call verification is awaiting the site implementation.
  *
- * The verification ID is a signed token {phone, channel, time}: no own storage.
+ * The verification ID is a signed token {phone, channel, time[, userId for a phone change]}: no own storage.
  */
 final class PhoneAuthService
 {
@@ -31,15 +32,7 @@ final class PhoneAuthService
 
 	public function start(string $phone, string $channel): array
 	{
-		$normalized = Formatter::phone($phone);
-		if ($normalized === null)
-		{
-			throw ApiException::validation('Неверный формат номера телефона', 'phone');
-		}
-		if (!in_array($channel, [self::CHANNEL_SMS, self::CHANNEL_CALL], true))
-		{
-			throw ApiException::validation('Способ подтверждения должен быть sms или call', 'channel');
-		}
+		$normalized = $this->validate($phone, $channel);
 
 		if (!$this->isTestMode())
 		{
@@ -83,10 +76,11 @@ final class PhoneAuthService
 	public function verify(string $id, ?string $code): int
 	{
 		$payload = $this->unsign($id);
-		if ($this->isExpired($payload))
+		if (isset($payload['userId']))
 		{
-			throw new ApiException(ErrorCode::VERIFICATION_EXPIRED, 'Время подтверждения истекло, запросите код заново');
+			throw ApiException::notFound('Подтверждение не найдено');
 		}
+		$this->checkExpired($payload);
 
 		$phone = $payload['phone'];
 		if ($payload['channel'] === self::CHANNEL_SMS)
@@ -128,6 +122,111 @@ final class PhoneAuthService
 		return $userId;
 	}
 
+	/**
+	 * Starts confirmation of a new phone number for a signed-in user.
+	 * The code is generated from the user's own phone auth secret and sent to the new number —
+	 * the same as CUser::SendPhoneCode does for the current one, so it is checked with CUser::VerifyPhoneCode.
+	 */
+	public function startPhoneChange(int $userId, string $phone, string $channel): array
+	{
+		$normalized = $this->validate($phone, $channel);
+		if ($normalized === $this->phone($userId))
+		{
+			throw ApiException::validation('Это ваш текущий номер', 'phone');
+		}
+		$this->checkPhoneFree($normalized, $userId);
+
+		if (!$this->isTestMode())
+		{
+			if ($channel === self::CHANNEL_CALL)
+			{
+				throw ApiException::unavailable('Подтверждение звонком пока недоступно, используйте SMS');
+			}
+
+			$retryAfter = $this->resendAfter($userId);
+			if ($retryAfter > 0)
+			{
+				throw new ApiException(
+					ErrorCode::TOO_MANY_REQUESTS,
+					sprintf('Повторно запросить код можно через %d сек.', $retryAfter),
+					['retryAfter' => $retryAfter]
+				);
+			}
+
+			$code = \CUser::GeneratePhoneCode($userId);
+			if (!$code)
+			{
+				throw ApiException::unavailable('Не удалось отправить SMS, попробуйте позже');
+			}
+			$sms = new SmsEvent(self::SMS_EVENT, ['USER_PHONE' => $normalized, 'CODE' => $code]);
+			$sms->setSite(Config::siteId());
+			$result = $sms->send(true);
+			if (!$result->isSuccess())
+			{
+				AddMessage2Log('Phone change SMS failed: ' . implode('; ', $result->getErrorMessages()), Config::MODULE_ID);
+				throw ApiException::unavailable('Не удалось отправить SMS, попробуйте позже');
+			}
+		}
+
+		$payload = ['phone' => $normalized, 'channel' => $channel, 'time' => time(), 'userId' => $userId];
+
+		return $this->toArray($this->sign($payload), $payload);
+	}
+
+	/**
+	 * Checks the code (SMS) or the confirmation (call) of a new number and sets it as the user's login phone.
+	 */
+	public function confirmPhoneChange(int $userId, string $id, ?string $code): void
+	{
+		$payload = $this->unsign($id);
+		if ((int)($payload['userId'] ?? 0) !== $userId)
+		{
+			throw ApiException::notFound('Подтверждение не найдено');
+		}
+		$this->checkExpired($payload);
+
+		if ($payload['channel'] === self::CHANNEL_SMS)
+		{
+			$code = trim((string)$code);
+			if ($code === '')
+			{
+				throw ApiException::validation('Введите код из SMS', 'code');
+			}
+
+			$isValid = $this->isTestMode()
+				? $code === Config::get('auth_test_code')
+				: (int)\CUser::VerifyPhoneCode((string)$this->phone($userId), $code) === $userId;
+			if (!$isValid)
+			{
+				throw new ApiException(ErrorCode::AUTH_CODE_INVALID, 'Неверный код');
+			}
+		}
+		elseif (!$this->isTestMode())
+		{
+			throw ApiException::unavailable('Подтверждение звонком пока недоступно, используйте SMS');
+		}
+
+		$phone = $payload['phone'];
+		$this->checkPhoneFree($phone, $userId);
+
+		// PERSONAL_PHONE too: the site handler OnAfterUserUpdate copies it into the login phone on every update.
+		$fields = ['PHONE_NUMBER' => $phone, 'PERSONAL_PHONE' => $phone];
+		$user = \CUser::GetByID($userId)->Fetch();
+		$oldPhone = $this->phone($userId);
+		if ($user && $oldPhone !== null && $user['LOGIN'] === ltrim($oldPhone, '+'))
+		{
+			// The login is the phone digits (site and API registration), keep it free for the old number.
+			$fields['LOGIN'] = ltrim($phone, '+');
+		}
+
+		$cUser = new \CUser();
+		if (!$cUser->Update($userId, $fields))
+		{
+			throw ApiException::validation(strip_tags((string)$cUser->LAST_ERROR), 'phone');
+		}
+		$this->activate($userId);
+	}
+
 	public function phone(int $userId): ?string
 	{
 		$row = UserPhoneAuthTable::getList(['filter' => ['=USER_ID' => $userId], 'select' => ['PHONE_NUMBER']])->fetch();
@@ -141,13 +240,10 @@ final class PhoneAuthService
 	 */
 	private function ensureUser(string $phone): int
 	{
-		$row = UserPhoneAuthTable::getList([
-			'filter' => ['=PHONE_NUMBER' => UserPhoneAuthTable::normalizePhoneNumber($phone)],
-			'select' => ['USER_ID'],
-		])->fetch();
-		if ($row)
+		$existingId = $this->userIdByPhone($phone);
+		if ($existingId !== null)
 		{
-			return (int)$row['USER_ID'];
+			return $existingId;
 		}
 
 		$password = bin2hex(random_bytes(12)) . 'Aa1!';
@@ -166,6 +262,48 @@ final class PhoneAuthService
 		}
 
 		return $userId;
+	}
+
+	private function validate(string $phone, string $channel): string
+	{
+		$normalized = Formatter::phone($phone);
+		if ($normalized === null)
+		{
+			throw ApiException::validation('Неверный формат номера телефона', 'phone');
+		}
+		if (!in_array($channel, [self::CHANNEL_SMS, self::CHANNEL_CALL], true))
+		{
+			throw ApiException::validation('Способ подтверждения должен быть sms или call', 'channel');
+		}
+
+		return $normalized;
+	}
+
+	private function userIdByPhone(string $phone): ?int
+	{
+		$row = UserPhoneAuthTable::getList([
+			'filter' => ['=PHONE_NUMBER' => UserPhoneAuthTable::normalizePhoneNumber($phone)],
+			'select' => ['USER_ID'],
+		])->fetch();
+
+		return $row ? (int)$row['USER_ID'] : null;
+	}
+
+	private function checkPhoneFree(string $phone, int $userId): void
+	{
+		$ownerId = $this->userIdByPhone($phone);
+		if ($ownerId !== null && $ownerId !== $userId)
+		{
+			throw ApiException::validation('Номер уже привязан к другому аккаунту', 'phone');
+		}
+	}
+
+	private function checkExpired(array $payload): void
+	{
+		if ($this->isExpired($payload))
+		{
+			throw new ApiException(ErrorCode::VERIFICATION_EXPIRED, 'Время подтверждения истекло, запросите код заново');
+		}
 	}
 
 	private function activate(int $userId): void
