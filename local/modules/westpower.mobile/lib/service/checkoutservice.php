@@ -247,8 +247,9 @@ final class CheckoutService
 
 		if (!empty($input['slot']) && is_array($input['slot']))
 		{
-			$slotValue = $this->slotValue($method['id'], (string)($input['slot']['date'] ?? ''), (int)($input['slot']['id'] ?? 0));
-			$this->setProperty($order, PropertyCode::ORDER_DELIVERY_TIME, $slotValue);
+			[$slotDate, $slotName] = $this->slotValue($method['id'], (string)($input['slot']['date'] ?? ''), (int)($input['slot']['id'] ?? 0));
+			$this->setProperty($order, PropertyCode::ORDER_DELIVERY_DATE, $slotDate);
+			$this->setProperty($order, PropertyCode::ORDER_DELIVERY_TIME, $slotName);
 		}
 
 		if (!empty($input['replacement']))
@@ -457,9 +458,9 @@ final class CheckoutService
 	}
 
 	/**
-	 * Slot value saved to the order property. The format is a stub until the site defines it (awaiting the site).
+	 * Slot as the site saves it: [DELIVERY_DATE "dd.mm.yyyy", DELIVERY_TIME slot name "10:00 - 12:00"].
 	 */
-	private function slotValue(int $methodId, string $date, int $slotId): string
+	private function slotValue(int $methodId, string $date, int $slotId): array
 	{
 		$timestamp = strtotime($date);
 		if (!$timestamp || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $date))
@@ -470,7 +471,7 @@ final class CheckoutService
 		{
 			if ($slot['id'] === $slotId)
 			{
-				return date('d.m.Y', $timestamp) . ' ' . $slot['name'];
+				return [date('d.m.Y', $timestamp), $slot['name']];
 			}
 		}
 

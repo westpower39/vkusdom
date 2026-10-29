@@ -189,7 +189,7 @@ final class OrderService
 			$properties[(string)$property->getField('CODE')] = $property->getValue();
 		}
 		$address = trim((string)($properties[PropertyCode::ORDER_DELIVERY_ADDRESS] ?? ''));
-		$deliveryTime = trim((string)($properties[PropertyCode::ORDER_DELIVERY_TIME] ?? ''));
+		$deliveryTime = trim(($properties[PropertyCode::ORDER_DELIVERY_DATE] ?? '') . ' ' . ($properties[PropertyCode::ORDER_DELIVERY_TIME] ?? ''));
 
 		$weight = (int)round((float)$basket->getWeight());
 		$status = $this->status($order);
