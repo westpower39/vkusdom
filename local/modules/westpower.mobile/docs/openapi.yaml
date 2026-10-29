@@ -1058,7 +1058,7 @@ paths:
     put:
       tags:
         - "profile"
-      summary: "Изменить имя, фамилию, отчество, дату рождения, e-mail"
+      summary: "Изменить ФИО, дату рождения, e-mail"
       responses:
         '200':
           description: "OK"
@@ -2311,13 +2311,13 @@ components:
                 phone:
                   type: "string"
                   nullable: true
-                name:
+                fullName:
                   type: "string"
                   nullable: true
               required:
                 - "id"
                 - "phone"
-                - "name"
+                - "fullName"
           required:
             - "user"
     VerificationRequest:
@@ -3131,16 +3131,11 @@ components:
         phone:
           type: "string"
           nullable: true
-        name:
+        fullName:
           type: "string"
           nullable: true
-        lastName:
-          type: "string"
-          nullable: true
-        secondName:
-          type: "string"
-          nullable: true
-          description: "Отчество"
+          description: "ФИО одной строкой, как ввёл пользователь (как на сайте)"
+          example: "Иванов Иван Иванович"
         birthDate:
           type: "string"
           format: "date"
@@ -3156,9 +3151,7 @@ components:
       required:
         - "id"
         - "phone"
-        - "name"
-        - "lastName"
-        - "secondName"
+        - "fullName"
         - "birthDate"
         - "email"
         - "notifications"
@@ -3166,12 +3159,10 @@ components:
       type: "object"
       description: "Передаются только изменяемые поля. Пустая строка очищает поле."
       properties:
-        name:
+        fullName:
           type: "string"
-        lastName:
-          type: "string"
-        secondName:
-          type: "string"
+          description: "ФИО одной строкой"
+          example: "Иванов Иван Иванович"
         birthDate:
           type: "string"
           format: "date"

@@ -15,8 +15,11 @@ use Westpower\Mobile\Dictionary\PropertyCode;
 use Westpower\Mobile\Exception\ApiException;
 
 /**
- * User profile (TZ 4.7): name, patronymic, birth date, e-mail; the phone is changed only through
+ * User profile (TZ 4.7): full name, birth date, e-mail; the phone is changed only through
  * phone verification (PhoneAuthService). Notification settings are awaiting the site storage — returned as null.
+ *
+ * Full name is one field, as on the site: it is stored in NAME (decision 29.10.2026).
+ * Users with LAST_NAME/SECOND_NAME filled (admin, imported) get them joined as "Last First Middle".
  */
 final class ProfileService
 {
@@ -36,9 +39,7 @@ final class ProfileService
 		return [
 			'id' => (int)$user['ID'],
 			'phone' => (new PhoneAuthService())->phone((int)$user['ID']),
-			'name' => (string)$user['NAME'] !== '' ? (string)$user['NAME'] : null,
-			'lastName' => (string)$user['LAST_NAME'] !== '' ? (string)$user['LAST_NAME'] : null,
-			'secondName' => (string)$user['SECOND_NAME'] !== '' ? (string)$user['SECOND_NAME'] : null,
+			'fullName' => self::fullName($user),
 			'birthDate' => $user['PERSONAL_BIRTHDAY'] instanceof Date ? $user['PERSONAL_BIRTHDAY']->format(self::BIRTH_DATE_FORMAT) : null,
 			'email' => (string)$user['EMAIL'] !== '' ? (string)$user['EMAIL'] : null,
 			'notifications' => null,
@@ -48,12 +49,11 @@ final class ProfileService
 	public function update(AuthContext $context, array $input): array
 	{
 		$fields = [];
-		foreach (['name' => 'NAME', 'lastName' => 'LAST_NAME', 'secondName' => 'SECOND_NAME'] as $key => $field)
+		if (array_key_exists('fullName', $input))
 		{
-			if (array_key_exists($key, $input))
-			{
-				$fields[$field] = trim((string)$input[$key]);
-			}
+			$fields['NAME'] = trim((string)preg_replace('/\s+/u', ' ', (string)$input['fullName']));
+			$fields['LAST_NAME'] = '';
+			$fields['SECOND_NAME'] = '';
 		}
 		if (array_key_exists('birthDate', $input))
 		{
@@ -145,6 +145,19 @@ final class ProfileService
 		}
 
 		TokenService::revokeUser($userId);
+	}
+
+	/**
+	 * @param array $user row with NAME, LAST_NAME, SECOND_NAME
+	 */
+	public static function fullName(array $user): ?string
+	{
+		$parts = array_filter(
+			[$user['LAST_NAME'] ?? '', $user['NAME'] ?? '', $user['SECOND_NAME'] ?? ''],
+			fn ($part) => trim((string)$part) !== ''
+		);
+
+		return $parts ? implode(' ', array_map('trim', $parts)) : null;
 	}
 
 	/**
