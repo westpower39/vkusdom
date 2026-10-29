@@ -418,8 +418,8 @@ final class CheckoutService
 
 		if ($context->isUser())
 		{
-			$user = UserTable::getList(['filter' => ['=ID' => $context->userId], 'select' => ['NAME', 'LAST_NAME', 'EMAIL']])->fetch();
-			$this->setPropertyIfEmpty($order, PropertyCode::ORDER_FIO, trim(($user['NAME'] ?? '') . ' ' . ($user['LAST_NAME'] ?? '')));
+			$user = UserTable::getList(['filter' => ['=ID' => $context->userId], 'select' => ['NAME', 'LAST_NAME', 'SECOND_NAME', 'EMAIL']])->fetch();
+			$this->setPropertyIfEmpty($order, PropertyCode::ORDER_FIO, (string)ProfileService::fullName($user ?: []));
 			$this->setPropertyIfEmpty($order, PropertyCode::ORDER_EMAIL, (string)($user['EMAIL'] ?? ''));
 			$this->setPropertyIfEmpty($order, PropertyCode::ORDER_PHONE, (string)(new PhoneAuthService())->phone((int)$context->userId));
 		}

@@ -4,6 +4,7 @@ namespace Westpower\Mobile\Auth;
 
 use Bitrix\Main\UserTable;
 use Westpower\Mobile\Exception\ApiException;
+use Westpower\Mobile\Service\ProfileService;
 
 /**
  * App sessions: guest session, login by a verified phone, token refresh, logout.
@@ -58,12 +59,12 @@ final class AuthService
 
 	private function user(int $userId, PhoneAuthService $phoneAuth): array
 	{
-		$row = UserTable::getList(['filter' => ['=ID' => $userId], 'select' => ['ID', 'NAME']])->fetch();
+		$row = UserTable::getList(['filter' => ['=ID' => $userId], 'select' => ['ID', 'NAME', 'LAST_NAME', 'SECOND_NAME']])->fetch();
 
 		return [
 			'id' => $userId,
 			'phone' => $phoneAuth->phone($userId),
-			'name' => $row && (string)$row['NAME'] !== '' ? $row['NAME'] : null,
+			'fullName' => $row ? ProfileService::fullName($row) : null,
 		];
 	}
 }

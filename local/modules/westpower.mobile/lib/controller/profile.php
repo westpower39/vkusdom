@@ -25,6 +25,36 @@ final class Profile extends Base
 		return $this->respond(fn () => (new ProfileService())->update($this->userContext(), $this->body()));
 	}
 
+	/** DELETE /api/v1/profile */
+	public function deleteProfileAction()
+	{
+		return $this->respond(function () {
+			(new ProfileService())->delete($this->userContext());
+
+			return null;
+		});
+	}
+
+	/** POST /api/v1/profile/phone/verifications — stub: the need for phone change is under discussion */
+	public function phoneVerificationAction()
+	{
+		return $this->respond(function () {
+			$this->userContext();
+
+			return $this->notImplemented();
+		});
+	}
+
+	/** PUT /api/v1/profile/phone — stub: the need for phone change is under discussion */
+	public function updatePhoneAction()
+	{
+		return $this->respond(function () {
+			$this->userContext();
+
+			return $this->notImplemented();
+		});
+	}
+
 	/** PUT /api/v1/profile/notifications — awaiting the site storage */
 	public function updateNotificationsAction()
 	{

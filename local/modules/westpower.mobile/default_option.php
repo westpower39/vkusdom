@@ -52,5 +52,5 @@ $westpower_mobile_default_option = [
 	'order_status_map' => "N=accepted\nP=paid\nDA=assembling\nDS=delivering\nF=completed",
 
 	// "Client service" pages for webview: code|name|url
-	'pages' => "legal|Правовая информация|/pravovaya-informatsiya/\noffer|Договор-оферта|/dogovor-oferta/\nconsent|Согласие на обработку персональных данных|/soglasie-na-obrabotku-personalnykh-dannykh/",
+	'pages' => "delivery-payment|Условия оплаты и доставки|/usloviya-oplaty-i-dostavki/\nloyalty|Правила программы лояльности|/pravila-programmy-loyalnosti/\nprivacy-policy|Политика обработки персональных данных|/politika-obrabotki-personalnykh-dannykh/\nconsent|Согласие на обработку персональных данных|/soglasie-na-obrabotku-personalnykh-dannykh/\noffer|Договор-оферта|/dogovor-oferta/\nlegal|Правовая информация|/pravovaya-informatsiya/",
 ];

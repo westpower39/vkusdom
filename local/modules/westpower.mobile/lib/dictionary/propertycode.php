@@ -3,7 +3,7 @@
 namespace Westpower\Mobile\Dictionary;
 
 /**
- * Iblock and order property codes used by the API.
+ * Iblock, order property and user field codes used by the API.
  */
 final class PropertyCode
 {
@@ -55,4 +55,11 @@ final class PropertyCode
 	public const ORDER_DELIVERY_FLOOR = 'DELIVERY_FLOOR';
 	public const ORDER_DELIVERY_HAS_ELEVATOR = 'DELIVERY_HAS_ELEVATOR';
 	public const ORDER_DELIVERY_HAS_FREIGHT_ELEVATOR = 'DELIVERY_HAS_FREIGHT_ELEVATOR';
+
+	// User fields with personal data (site "method of obtaining" address), cleared on account deletion
+	public const USER_PERSONAL_FIELDS = [
+		'UF_METHOD_OBTAINING_ADDRESS',
+		'UF_METHOD_OBTAINING_LAT',
+		'UF_METHOD_OBTAINING_LON',
+	];
 }
